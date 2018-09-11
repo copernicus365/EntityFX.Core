@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>EntityFX.Core</RootNamespace>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;1591;</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Include="..\EntityFX.Core.Base\src\InternalHelpers.cs" Link="src\InternalHelpers.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.0" />
+		<PackageReference Include="System.Net.Http" Version="4.3.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\EntityFX.Core.Base\EntityFX.Core.Base.csproj" />
+	</ItemGroup>
+
+</Project>
