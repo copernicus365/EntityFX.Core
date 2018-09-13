@@ -3,6 +3,13 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<RootNamespace>EntityFX.Core</RootNamespace>
+		<Version>1.0.0-preview1-1</Version>
+		<Authors>Nicholas Petersen</Authors>
+		<Company>Nicholas Petersen</Company>
+		<PackageProjectUrl>https://github.com/copernicus365/EntityFX.Core</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
+		<PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
