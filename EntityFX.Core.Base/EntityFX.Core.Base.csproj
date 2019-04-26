@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<!--<TargetFramework>netstandard2.0</TargetFramework>-->
+		<TargetFrameworks>netstandard2.0;net471</TargetFrameworks>
 		<RootNamespace>EntityFX.Core</RootNamespace>
+		<AssemblyVersion>2.0.1.0</AssemblyVersion>
+		<FileVersion>2.0.1.0</FileVersion>
+		<Version>2.0.1.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageProjectUrl>https://github.com/copernicus365/EntityFX.Core</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
 		<PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
 		<PackageReleaseNotes></PackageReleaseNotes>
-		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<Authors>Nicholas Petersen</Authors>
-		<FileVersion>1.0.0.0</FileVersion>
-		<Version>1.0.0-preview1-1</Version>
 		<Description></Description>
 	</PropertyGroup>
 
