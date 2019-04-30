@@ -2,35 +2,43 @@
 
 	<PropertyGroup>
 		<!--<TargetFramework>netstandard2.0</TargetFramework>-->
-		<!--<Version>1.0.0-preview1-1</Version>-->
 		<TargetFrameworks>netstandard2.0;net471</TargetFrameworks>
+		<Version>3.0.1</Version>
+		<!--<Version>1.0.0-preview1-1</Version>-->
+		<AssemblyVersion>3.0.1.0</AssemblyVersion>
+		<FileVersion>3.0.1.0</FileVersion>
 		<RootNamespace>EntityFX.Core</RootNamespace>
-		<AssemblyVersion>2.0.1.0</AssemblyVersion>
-		<FileVersion>2.0.1.0</FileVersion>
-		<Version>2.0.1.0</Version>
 		<Authors>Nicholas Petersen</Authors>
-		<PackageProjectUrl>https://github.com/copernicus365/EntityFX.Core</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
-		<PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
+		<PackageProjectUrl>https://github.com/copernicus365/EntityFX.Core</PackageProjectUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
+		<PackageReleaseNotes />
+		<Description></Description>
+		<NoWarn>1701;1702;1591;</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <NoWarn>1701;1702;1591;</NoWarn>
+		<DocumentationFile>bin\Debug\netstandard2.0\EntityFX.Core.xml</DocumentationFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DocumentationFile>bin\Release\netstandard2.0\EntityFX.Core.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Include="..\EntityFX.Core.Base\src\InternalHelpers.cs" Link="src\InternalHelpers.cs" />
+		<Compile Include="..\EntityFX.Core.Base\src\InternalHelpers.cs" Link="src\InternalHelpers.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.0" />
-		<PackageReference Include="System.Net.Http" Version="4.3.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\EntityFX.Core.Base\EntityFX.Core.Base.csproj" />
+		<ProjectReference Include="..\EntityFX.Core.Base\EntityFX.Core.Base.csproj" />
 	</ItemGroup>
 
 </Project>

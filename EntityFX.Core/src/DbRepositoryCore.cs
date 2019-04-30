@@ -150,10 +150,10 @@ namespace EntityFX.Core
 		/// The default value is set to the static value of <see cref="AsNoTrackingDefault"/>.
 		/// (currently is false). Set to false (default) gives the expected and typical EF behavior,
 		/// so that gotten items ARE cached in the dbContext.
-		/// But when set to TRUE, calling <see cref="Get(bool?))"/> with no parameters
+		/// But when set to TRUE, calling `Get(bool?)` with no parameters
 		/// (returning dbset essentially) returns dbset.AsNoTracking(), which also effects GetById 
 		/// or any other of the many
-		/// code calls that start with Get(). Note that there is an overload on <see cref="Get(bool?))"/>
+		/// code calls that start with Get(). Note that there is an overload on `Get(bool?)`
 		/// allowing you to specify whether to track or not still.
 		/// <para />
 		/// The documentation for AsNoTracking is as follows:
