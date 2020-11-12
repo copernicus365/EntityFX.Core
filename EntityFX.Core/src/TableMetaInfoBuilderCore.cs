@@ -1,16 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace EntityFX.Core
 {
 	public class TableMetaInfoBuilderCore : TableMetaInfoBuilderCoreBase
 	{
-		private DbContext db;
+		private readonly DbContext db;
 
 		public TableMetaInfoBuilderCore(DbContext dbContext)
 		{
@@ -34,46 +33,52 @@ namespace EntityFX.Core
 
 			IEntityType[] allEntityTypes = model.GetEntityTypes().ToArray();
 			IProperty[] entityProperties = entityType.GetProperties().ToArray();
-
-			IRelationalEntityTypeAnnotations mapping = entityType.Relational();
 			EFPropertyInfo[] pProperties = new EFPropertyInfo[entityProperties.Length];
 
 			// Column info 
-			for (int i = 0; i < entityProperties.Length; i++) { // (var property in entityProperties) {
+			for(int i = 0; i < entityProperties.Length; i++) {
 				IProperty prop = entityProperties[i];
 
-				IRelationalPropertyAnnotations rProp = prop.Relational();
-
-				if (rProp == null || rProp.ColumnName.IsNulle())
+				string colNm = prop.GetColumnName().NullIfEmptyTrimmed();
+				if(colNm == null)
 					continue;
 
 				bool isIndex = prop.IsIndex();
 				var idx1 = prop.GetContainingKeys().ToArray();
 
 				EFPropertyInfo pInfo = new EFPropertyInfo() {
-					EntityName = prop.Name,
-					ColumnName = rProp.ColumnName,
+					EntityName = prop.Name, // prop.Name,
+					ColumnName = colNm, //rProp.ColumnName,
 					IsIdentity = false,
 					IsKey = prop.IsKey(),
 					IsIndex = isIndex,
 					IsPrimaryKey = prop.IsPrimaryKey()
 				};
 
-				string columnType = rProp.ColumnType;
+				string columnType = prop.GetColumnType();
 
 				pProperties[i] = pInfo;
-			};
-
+			}
 
 			var info = new TableMetaInfo() {
-				TableName = mapping.TableName, //table.Table, // watch out! not table.Name
-				TableSchema = mapping.Schema, //table.Schema,
+				TableName = entityType.GetTableName(), // mapping.TableName, //table.Table, // watch out! not table.Name
+				TableSchema = entityType.GetSchema(), // mapping.Schema, //table.Schema,
 				TypeNameFull = entityType.Name, // or: == type.FullName,
 				TypeName = type.Name,
-				TableColumnNames = pProperties.Select(p => p.ColumnName).Where(n => n.NotNulle()).ToArray(), //declaredProps.Select(dp => dp.Name).ToArray(),
-				EntityPropertyNames = pProperties.Select(p => p.EntityName).Where(n => n.NotNulle()).ToArray(), //mapped.Select(dd => dd.Name).ToArray()
-				KeyColumnNames = pProperties.Where(p => p != null && p.IsKey).Select(p => p.ColumnName).ToArray(), // table.ElementType.KeyMembers.Select(m => m.Name).ToArray(),
+				TableColumnNames = pProperties
+					.Select(p => p.ColumnName)
+					.Where(n => n.NotNulle())
+					.ToArray(), //declaredProps.Select(dp => dp.Name).ToArray(),
+				EntityPropertyNames = pProperties
+					.Select(p => p.EntityName)
+					.Where(n => n.NotNulle())
+					.ToArray(), //mapped.Select(dd => dd.Name).ToArray()
+				KeyColumnNames = pProperties
+					.Where(p => p != null && p.IsKey)
+					.Select(p => p.ColumnName)
+					.ToArray(), // table.ElementType.KeyMembers.Select(m => m.Name).ToArray(),
 			};
+
 			return info;
 		}
 	}

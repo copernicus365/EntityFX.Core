@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 namespace EntityFX.Core
@@ -42,7 +42,7 @@ namespace EntityFX.Core
 		/// </summary>
 		public string TableNameFull {
 			get {
-				if (_TableFullName.IsNulle()) {
+				if(_TableFullName.IsNulle()) {
 					_TableFullName = GetFullTableName(TableSchema, TableName);
 				}
 				return _TableFullName;
@@ -55,17 +55,17 @@ namespace EntityFX.Core
 
 		static string _bracket(string val)
 		{
-			return val.IsNulle() || val[0] == '[' 
-				? val 
+			return val.IsNulle() || val[0] == '['
+				? val
 				: '[' + val + ']';
 		}
 
 		public static string GetFullTableName(string schema, string name)
 		{
-			if (schema.IsNulle()) {
+			if(schema.IsNulle()) {
 				return name.IsNulle() ? null : _bracket(name);
 			}
-			if (schema.NotNulle() && name.IsNulle())
+			if(schema.NotNulle() && name.IsNulle())
 				throw new ArgumentNullException("The table name must be set if the schema is specified.");
 
 			return _bracket(schema) + '.' + _bracket(name);

@@ -1,42 +1,38 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<Version>3.1.0</Version>
-		<AssemblyVersion>3.1.0.0</AssemblyVersion>
-		<FileVersion>3.1.0.0</FileVersion>
-		<RootNamespace>EntityFX.Core</RootNamespace>
-		<Authors>Nicholas Petersen</Authors>
-		<RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
-		<PackageProjectUrl>https://github.com/copernicus365/EntityFX.Core</PackageProjectUrl>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
-		<PackageReleaseNotes />
-		<Description></Description>
-		<NoWarn>1701;1702;1591;</NoWarn>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>4.0.0</VersionPrefix>
+    <RootNamespace>EntityFX.Core</RootNamespace>
+    <Authors>Nicholas Petersen</Authors>
+    <RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/copernicus365/EntityFX.Core</PackageProjectUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
+    <PackageReleaseNotes />
+    <Description></Description>
+    <NoWarn>1701;1702;1591;</NoWarn>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>bin\Debug\netstandard2.0\EntityFX.Core.xml</DocumentationFile>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\EntityFX.Core.xml</DocumentationFile>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DocumentationFile>bin\Release\netstandard2.0\EntityFX.Core.xml</DocumentationFile>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\EntityFX.Core.xml</DocumentationFile>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Include="..\EntityFX.Core.Base\src\InternalHelpers.cs" Link="src\InternalHelpers.cs" />
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\EntityFX.Core.Base\src\InternalHelpers.cs" Link="src\InternalHelpers.cs" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.4" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
-		<PackageReference Include="System.Net.Http" Version="4.3.4" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.10" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\EntityFX.Core.Base\EntityFX.Core.Base.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EntityFX.Core.Base\EntityFX.Core.Base.csproj" />
+  </ItemGroup>
 
 </Project>

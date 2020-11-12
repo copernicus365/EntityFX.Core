@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,11 +19,12 @@ namespace EntityFX.Core
 		{
 			string columnType = $"decimal({decimalPrecision.Key}, {decimalPrecision.Value})"; //"decimal(18, 6)";
 
-			foreach (var property in modelBuilder.Model.GetEntityTypes()
+			foreach(var property in modelBuilder.Model.GetEntityTypes()
 				.SelectMany(t => t.GetProperties())
 				.Where(p => p.ClrType == typeof(decimal))) {
 
-				property.Relational().ColumnType = columnType;
+				property.SetColumnType(columnType);
+				//property.Relational().ColumnType = columnType;
 			}
 			//modelBuilder.Conventions.Remove<DecimalPropertyConvention>();
 			//modelBuilder.Conventions.Add(new System.Data.Entity.ModelConfiguration.Conventions.DecimalPropertyConvention(38, 18));
@@ -31,9 +32,9 @@ namespace EntityFX.Core
 
 		public static void SetLog(this DbContextOptionsBuilder optionsBuilder, Action<LogLevel, string> logAction)
 		{
-			if (logAction != null) {
+			if(logAction != null) {
 				optionsBuilder.UseLoggerFactory(DataContextLoggerProvider.CreateFactory(logAction));
-					//(state, val) => { Console.WriteLine($" - sql-log: {state}]  {val}"); }));
+				//(state, val) => { Console.WriteLine($" - sql-log: {state}]  {val}"); }));
 			}
 		}
 
