@@ -55,8 +55,6 @@ namespace EntityFX.Core
 					IsPrimaryKey = prop.IsPrimaryKey()
 				};
 
-				string columnType = prop.GetColumnType();
-
 				pProperties[i] = pInfo;
 			}
 
