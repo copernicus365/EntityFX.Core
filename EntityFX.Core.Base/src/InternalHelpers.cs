@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,17 +13,17 @@ namespace EntityFX.Core
 	/// we do not need that external ref.
 	/// </summary>
 	internal static class InternalHelpers
-	{ 
+	{
 		internal static StringBuilder TrimEnd(this StringBuilder sb)
 		{
-			if (sb == null || sb.Length == 0) return sb;
+			if(sb == null || sb.Length == 0) return sb;
 
 			int i = sb.Length - 1;
-			for (; i >= 0; i--)
-				if (!char.IsWhiteSpace(sb[i]))
+			for(; i >= 0; i--)
+				if(!char.IsWhiteSpace(sb[i]))
 					break;
 
-			if (i < sb.Length - 1)
+			if(i < sb.Length - 1)
 				sb.Length = i + 1;
 
 			return sb;
@@ -32,12 +32,12 @@ namespace EntityFX.Core
 		[DebuggerStepThrough]
 		internal static bool TryGetValueAny<TKey, TVal>(this IDictionary<TKey, TVal> dict, out TVal val, params TKey[] values)
 		{
-			if (dict != null && dict.Count > 0 && values != null && values.Length > 0) {
-				for (int i = 0; i < values.Length; i++)
-					if (dict.TryGetValue(values[i], out val))
+			if(dict != null && dict.Count > 0 && values != null && values.Length > 0) {
+				for(int i = 0; i < values.Length; i++)
+					if(dict.TryGetValue(values[i], out val))
 						return true;
 			}
-			val = default(TVal);
+			val = default;
 			return false;
 		}
 
@@ -78,7 +78,7 @@ namespace EntityFX.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static string TrimIfNeeded(this string s)
 		{
-			if (s.IsTrimmable())
+			if(s.IsTrimmable())
 				return s.Trim();
 			return s;
 		}
@@ -87,9 +87,9 @@ namespace EntityFX.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static bool IsTrimmable(this string s)
 		{
-			if (s != null) {
+			if(s != null) {
 				int len = s.Length;
-				if (len > 1)
+				if(len > 1)
 					return char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[len - 1]);
 				return len == 0 || char.IsWhiteSpace(s[0]);
 			}
@@ -102,35 +102,19 @@ namespace EntityFX.Core
 
 		[DebuggerStepThrough]
 		internal static bool IsNulle<TSource>(this TSource[] source)
-		{
-			return (source == null || source.Length == 0)
-				? true
-				: false;
-		}
+			=> source == null || source.Length == 0;
 
 		[DebuggerStepThrough]
 		internal static bool IsNulle<TSource>(this ICollection<TSource> source)
-		{
-			return (source == null || source.Count == 0)
-				? true
-				: false;
-		}
+			=> source == null || source.Count == 0;
 
 		[DebuggerStepThrough]
 		internal static bool NotNulle<TSource>(this TSource[] source)
-		{
-			return !(source == null || source.Length == 0)
-				? true
-				: false;
-		}
+			=> !(source == null || source.Length == 0);
 
 		[DebuggerStepThrough]
 		internal static bool NotNulle<TSource>(this ICollection<TSource> source)
-		{
-			return !(source == null || source.Count == 0)
-				? true
-				: false;
-		}
+			=> !(source == null || source.Count == 0);
 
 		#endregion
 
@@ -141,18 +125,18 @@ namespace EntityFX.Core
 		[DebuggerStepThrough]
 		internal static string JoinToString<T>(this IEnumerable<T> thisEnumerable, string separator = ",")
 		{
-			if (thisEnumerable == null) throw new ArgumentNullException("thisEnumerable");
-			if (separator == null) throw new ArgumentNullException("separator");
+			if(thisEnumerable == null) throw new ArgumentNullException("thisEnumerable");
+			if(separator == null) throw new ArgumentNullException("separator");
 
 			StringBuilder sb = new StringBuilder("");
 
-			foreach (T item in thisEnumerable)
+			foreach(T item in thisEnumerable)
 				sb.Append(item.ToString() + separator);
 
-			if (sb.Length == 0)
+			if(sb.Length == 0)
 				return "";
-			if (sb.Length > separator.Length)
-				sb.Length = sb.Length - separator.Length; // get rid of the last separator append
+			if(sb.Length > separator.Length)
+				sb.Length -= separator.Length; // get rid of the last separator append
 
 			return sb.ToString();
 		}
@@ -169,10 +153,10 @@ namespace EntityFX.Core
 
 		internal static T[] JoinSequences<T>(this IList<T> seq1, IList<T> seq2)
 		{
-			if (seq1 == null && seq2 == null) throw new ArgumentNullException();
-			if (seq1 == null)
+			if(seq1 == null && seq2 == null) throw new ArgumentNullException();
+			if(seq1 == null)
 				return seq2.ToArray();
-			else if (seq2 == null)
+			else if(seq2 == null)
 				return seq1.ToArray();
 
 			int seq1Cnt = seq1.Count;
@@ -180,10 +164,10 @@ namespace EntityFX.Core
 			T[] combined = new T[seq1Cnt + seq2Cnt];
 
 			int i = 0;
-			for (int j = 0; j < seq1Cnt; j++, i++)
+			for(int j = 0; j < seq1Cnt; j++, i++)
 				combined[i] = seq1[j];
 
-			for (int j = 0; j < seq2Cnt; j++, i++)
+			for(int j = 0; j < seq2Cnt; j++, i++)
 				combined[i] = seq2[j];
 
 			return combined;
@@ -207,17 +191,17 @@ namespace EntityFX.Core
 
 		internal static T E<T>(this T t) where T : new()
 		{
-			if (t != null)
+			if(t != null)
 				return t;
 			return new T();
 		}
 
 		internal static StringBuilder AppendMany(this StringBuilder sb, params object[] items)
 		{
-			if (sb == null || items == null || items.Length == 0)
+			if(sb == null || items == null || items.Length == 0)
 				return sb;
 
-			for (int i = 0; i < items.Length; i++)
+			for(int i = 0; i < items.Length; i++)
 				sb.Append(items[i]);
 
 			return sb;
@@ -242,11 +226,11 @@ namespace EntityFX.Core.Internal
 		/// <returns></returns>
 		internal static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
 		{
-			if (assembly == null) throw new ArgumentNullException("assembly");
+			if(assembly == null) throw new ArgumentNullException("assembly");
 			try {
 				return assembly.GetTypes();
 			}
-			catch (ReflectionTypeLoadException e) {
+			catch(ReflectionTypeLoadException e) {
 				return e.Types.Where(t => t != null);
 			}
 		}
@@ -259,10 +243,10 @@ namespace EntityFX.Core.Internal
 		/// <param name="assembly">Assembly</param>
 		internal static IEnumerable<Type> GetTypesImplementingThisInterface(this Type interfaceType, Assembly assembly)
 		{
-			if (interfaceType == null || assembly == null)
+			if(interfaceType == null || assembly == null)
 				return null;
 
-			if (!interfaceType.IsInterface)
+			if(!interfaceType.IsInterface)
 				throw new ArgumentException("Input type must be the type of an interface.");
 
 			return assembly.GetLoadableTypes().Where(interfaceType.IsAssignableFrom).ToList();
@@ -276,7 +260,7 @@ namespace EntityFX.Core.Internal
 		/// <param name="interfaceType">Interface type, must be an interface.</param>
 		internal static IEnumerable<Type> GetTypesImplementingThisInterface(this Type interfaceType)
 		{
-			if (interfaceType == null)
+			if(interfaceType == null)
 				return null;
 
 			var assembly = Assembly.GetAssembly(interfaceType);

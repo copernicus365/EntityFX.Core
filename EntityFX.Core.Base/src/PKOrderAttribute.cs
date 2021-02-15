@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace EntityFX.Core
 {
@@ -35,7 +35,7 @@ namespace EntityFX.Core
 			get => _pkOrderClause;
 			set {
 				string val = value.NullIfEmptyTrimmed();
-				if (val.IsNullOrWhiteSpace())
+				if(val.IsNullOrWhiteSpace())
 					throw new ArgumentException("Value is null or white space", nameof(value));
 				_pkOrderClause = val;
 			}

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace EntityFX.QueryableExtensions
@@ -32,9 +33,9 @@ namespace EntityFX.QueryableExtensions
 	public static class EFQueryableExtensions
 	{
 		public static Task<TSource> FirstOrDefaultEFCoreAsync<TSource>(
-			this IQueryable<TSource> source, 
-			Expression<Func<TSource, bool>> predicate, 
-			CancellationToken cancellationToken = default(CancellationToken))
+			this IQueryable<TSource> source,
+			Expression<Func<TSource, bool>> predicate,
+			CancellationToken cancellationToken = default)
 		{
 			return EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
 				source, predicate, cancellationToken);
@@ -42,7 +43,7 @@ namespace EntityFX.QueryableExtensions
 
 		public static Task<TSource[]> ToArrayEFCoreAsync<TSource>(
 			this IQueryable<TSource> source,
-			CancellationToken cancellationToken = default(CancellationToken))
+			CancellationToken cancellationToken = default)
 		{
 			return EntityFrameworkQueryableExtensions.ToArrayAsync(
 				source, cancellationToken);
@@ -50,7 +51,7 @@ namespace EntityFX.QueryableExtensions
 
 		public static Task<List<TSource>> ToListEFCoreAsync<TSource>(
 			this IQueryable<TSource> source,
-			CancellationToken cancellationToken = default(CancellationToken))
+			CancellationToken cancellationToken = default)
 		{
 			return EntityFrameworkQueryableExtensions.ToListAsync(
 				source, cancellationToken);

@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text;
+using System.Collections.Generic;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace EntityFX.Core
@@ -32,10 +31,10 @@ namespace EntityFX.Core
 		{
 			var tdCodes = new List<string>(dbContexts.Length);
 
-			if (options == null)
+			if(options == null)
 				options = new TDCodeGenerator();
 
-			for (int i = 0; i < dbContexts.Length; i++) {
+			for(int i = 0; i < dbContexts.Length; i++) {
 				string tdCode = GetTableDefinitionsCodeForAllDbSets(dbContexts[i], options, withNamespace: false);
 				tdCodes.Add(tdCode);
 			}
@@ -51,25 +50,24 @@ namespace EntityFX.Core
 			string pathTDsOldCommentedOutCSFile = null,
 			int maxLinesToSaveOldCommentedOutVersion = 10_000)
 		{
-			if (options == null)
+			if(options == null)
 				options = new TDCodeGenerator();
 
 			var tdCodes = new List<string>(dbContexts.Length);
 
-			for (int i = 0; i < dbContexts.Length; i++) {
+			for(int i = 0; i < dbContexts.Length; i++) {
 				string tdCode = GetTableDefinitionsCodeForAllDbSets(dbContexts[i], options, withNamespace: false);
 				tdCodes.Add(tdCode);
 			}
 
 			string finalResult = options.WriteNewTableDefinitionsCode(
-				tdCodes, 
-				pathTDsCSFile, 
-				pathTDsOldCommentedOutCSFile, 
+				tdCodes,
+				pathTDsCSFile,
+				pathTDsOldCommentedOutCSFile,
 				maxLinesToSaveOldCommentedOutVersion);
 
 			return finalResult;
 		}
-
 
 	}
 }

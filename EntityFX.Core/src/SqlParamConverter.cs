@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
+
+using Microsoft.Data.SqlClient;
 
 namespace EntityFX.Core
 {
@@ -20,8 +21,7 @@ namespace EntityFX.Core
 
 		public static string ToSQL(this SQLQuery q, out SqlParameter[] args)
 		{
-			SqlParam[] _args;
-			string sql = q.ToSQL(out _args);
+			string sql = q.ToSQL(out SqlParam[] _args);
 
 			args = _args?.Select(a => a.ToSqlParameter()).ToArray();
 			return sql;

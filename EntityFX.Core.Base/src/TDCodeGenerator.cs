@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,7 +28,7 @@ namespace EntityFX.Core
 
 		public static string DefaultCodeNamespace { get; set; } = "EntityFX.TDs";
 
-		static string[] _necessaryUsings = { "System", "System.Collections.Generic", "System.Linq", "EntityFX.Core" };
+		static readonly string[] _necessaryUsings = { "System", "System.Collections.Generic", "System.Linq", "EntityFX.Core" };
 
 		public string WrapTableDefinitionsCodeInOuterNamespaceAndUsings(
 			IList<string> codes,
@@ -49,7 +49,7 @@ namespace EntityFX.Core
 
 			var usingDirectivesDict = GetUsingDirectives();
 
-			foreach (string u in usingDirectivesDict.Keys)
+			foreach(string u in usingDirectivesDict.Keys)
 				sb.AppendLine($"using {u};");
 
 			// --- write namespace ---
@@ -60,7 +60,7 @@ namespace EntityFX.Core
 namespace ");
 
 			string ns = CodeNamespace.NullIfEmptyTrimmed() ?? DefaultCodeNamespace.NullIfEmptyTrimmed();
-			if (ns.IsNulle())
+			if(ns.IsNulle())
 				throw new ArgumentNullException(nameof(CodeNamespace), $"Either {nameof(CodeNamespace)} or {nameof(DefaultCodeNamespace)} must be set");
 
 			sb.Append(ns);
@@ -71,7 +71,7 @@ namespace ");
 
 			// --- write code tds ---
 
-			foreach (var code in codes)
+			foreach(var code in codes)
 				sb.AppendLine(code);
 
 			// --- write end ---
@@ -86,16 +86,15 @@ namespace ");
 
 		public string GetStronglyTypedTableDefinitionCode(ITableMetaInfo tmi)
 		{
-			var info = tmi;
 			string[] tblCols = tmi.TableColumnNames;
 			string[] entCols = tmi.EntityPropertyNames;
 
-			if (tmi.TableName.IsNulle() || tblCols.IsNulle() || tblCols.Length != entCols.Length)
+			if(tmi.TableName.IsNulle() || tblCols.IsNulle() || tblCols.Length != entCols.Length)
 				throw new ArgumentException();
 
 			string finalInterfaceExtraVal = null;
-			if (ExtraInterfacesPerTD.NotNulle()) {
-				if (ExtraInterfacesPerTD.TryGetValueAny(out finalInterfaceExtraVal, tmi.TypeName, tmi.TypeNameFull, tmi.TableName))
+			if(ExtraInterfacesPerTD.NotNulle()) {
+				if(ExtraInterfacesPerTD.TryGetValueAny(out finalInterfaceExtraVal, tmi.TypeName, tmi.TypeNameFull, tmi.TableName))
 					finalInterfaceExtraVal += ", ";
 			}
 
@@ -113,7 +112,7 @@ namespace ");
 			// --- Static Column Values ---
 			sb.Append("		#region --- CONST PROPERTY NAMES ---\r\n\r\n");
 
-			for (int i = 0; i < tblCols.Length; i++)
+			for(int i = 0; i < tblCols.Length; i++)
 				sb.AppendFormat("		public const string _{0} = \"{1}\";\r\n", entCols[i], tblCols[i]);
 
 			sb.Append("\r\n		#endregion\r\n\r\n");
@@ -124,7 +123,7 @@ namespace ");
 			// --- Column Properties ---
 			sb.Append("		#region --- Strongly Typed Instance Table Column Names ---\r\n\r\n");
 
-			for (int i = 0; i < tblCols.Length; i++)
+			for(int i = 0; i < tblCols.Length; i++)
 				sb.AppendFormat("		public string {0} => _{0};\r\n", entCols[i]);
 
 			sb.Append("\r\n		#endregion\r\n\r\n");
@@ -166,13 +165,13 @@ namespace ");
 			TDCodeGenerator codeGenOps = null,
 			bool withNamespace = true)
 		{
-			if (types == null) return null;
+			if(types == null) return null;
 
 			Type[] arr = types.ToArray();
 
 			var codes = new List<string>(arr.Length);
 
-			for (int i = 0; i < arr.Length; i++) {
+			for(int i = 0; i < arr.Length; i++) {
 				Type t = arr[i];
 				string code = tmiBldr.GetTableDefinitionCode(
 					t,
@@ -181,7 +180,7 @@ namespace ");
 				codes.Add(code);
 			}
 
-			if (!withNamespace)
+			if(!withNamespace)
 				return codes.JoinToString("\r\n");
 
 			return codeGenOps.WrapTableDefinitionsCodeInOuterNamespaceAndUsings(codes);
@@ -212,7 +211,7 @@ namespace ");
 		{
 			string code = GetStronglyTypedTableDefinitionCode(tinfo);
 
-			if (withNamespace) {
+			if(withNamespace) {
 				code = WrapTableDefinitionsCodeInOuterNamespaceAndUsings(new string[] { code });
 			}
 			return code;
@@ -227,7 +226,7 @@ namespace ");
 
 			string code = GetStronglyTypedTableDefinitionCode(tinfo);
 
-			if (withNamespace)
+			if(withNamespace)
 				code = WrapTableDefinitionsCodeInOuterNamespaceAndUsings(new string[] { code });
 
 			return code;
@@ -239,11 +238,11 @@ namespace ");
 		{
 			var dict = new Dictionary<string, string>();
 
-			foreach ((Type entityInterface, Type tableDefInterfaceForEntityInterface) in kvs) {
+			foreach((Type entityInterface, Type tableDefInterfaceForEntityInterface) in kvs) {
 
 				string tdTypeFullName = tableDefInterfaceForEntityInterface.Name;
 
-				foreach (Type entityType in entityInterface
+				foreach(Type entityType in entityInterface
 					.GetTypesImplementingThisInterface()
 					.Where(t => !t.IsInterface)) {
 
@@ -268,10 +267,10 @@ namespace ");
 
 			string path = pathTDsCSFile.NullIfEmptyTrimmed();
 
-			if (path.IsNulle() || !File.Exists(path))
+			if(path.IsNulle() || !File.Exists(path))
 				throw new FileNotFoundException(null, path);
 
-			if (maxLinesToSaveOldCommentedOutVersion > 0) {
+			if(maxLinesToSaveOldCommentedOutVersion > 0) {
 
 				var sb = new StringBuilder()
 					.AppendLine(AutoGeneratedLine())
@@ -279,14 +278,14 @@ namespace ");
 
 				string[] currLines = File.ReadAllLines(path);
 
-				for (int i = 0; i < currLines.Length && i < maxLinesToSaveOldCommentedOutVersion; i++) {
+				for(int i = 0; i < currLines.Length && i < maxLinesToSaveOldCommentedOutVersion; i++) {
 					string line = currLines[i];
 					sb.Append("//");
 					sb.AppendLine(line);
 				}
 
 				pathTDsOldCommentedOutCSFile = pathTDsOldCommentedOutCSFile.NullIfEmptyTrimmed(); //Path_TableDefinitionsOldCommentedOutCSFile
-				if (pathTDsOldCommentedOutCSFile == null) {
+				if(pathTDsOldCommentedOutCSFile == null) {
 					pathTDsOldCommentedOutCSFile = $"{Path.GetDirectoryName(path)}\\exclude\\{Path.GetFileNameWithoutExtension(path)}-old-{_toXmlTime(DateTime.UtcNow)}.cs"
 						.Replace("\\\\", "\\");
 				}
@@ -304,7 +303,7 @@ namespace ");
 		{
 			var usingDirectivesDict = new Dictionary<string, bool>();
 
-			foreach (string u in _necessaryUsings.Concat(UsingDirectives ?? new string[] { }))
+			foreach(string u in _necessaryUsings.Concat(UsingDirectives ?? new string[] { }))
 				usingDirectivesDict[u] = false;
 
 			return usingDirectivesDict;
@@ -315,10 +314,10 @@ namespace ");
 			List<Type> tdTypes = new List<Type>();
 			Dictionary<Type, Type> dict = new Dictionary<Type, Type>();
 
-			foreach (Type type in typesForAssemblies) {
+			foreach(Type type in typesForAssemblies) {
 				var assembly = Assembly.GetAssembly(type);
 
-				foreach (Type tdType in
+				foreach(Type tdType in
 					typeof(ITableDefinition)
 					.GetTypesImplementingThisInterface(assembly)
 					.Where(t => !t.IsInterface)) {
@@ -332,7 +331,7 @@ namespace ");
 		public static string AutoGeneratedLine()
 			=> $"// ======= auto generated: {_toXmlTime(DateTime.UtcNow)} =======";
 
-		static string _toXmlTime(DateTime dt) 
+		static string _toXmlTime(DateTime dt)
 			=> dt.ToString("yyyy-MM-ddTHH-mm-ssZ");
 
 	}
