@@ -63,11 +63,13 @@ namespace EntityFX.Core
 		/// <para/>
 		/// <code>dbcontext.GetTableMetaInfo(typeof(T))</code>
 		/// </summary>
-		public TableMetaInfo TableMeta {
-			get {
+		public TableMetaInfo TableMeta
+		{
+			get
+			{
 				_TableInfo = GetNewTableInfo();
 				// note this is STATIC! will only need set ONCE for this generic DbRepo child type
-				if(_TableInfo == null)
+				if (_TableInfo == null)
 					SetTabelInfo(GetNewTableInfo());
 				return _TableInfo;
 			}
@@ -94,18 +96,20 @@ namespace EntityFX.Core
 		protected void INIT()
 		{
 			// FIRST TIME STATIC SET
-			if(!_static_orderByAttrSet) {
+			if (!_static_orderByAttrSet)
+			{
 				_static_orderByAttrSet = true;
 
-				if(typeof(T).GetCustomAttributes(typeof(PKOrderAttribute), inherit: true).FirstOrDefault() is PKOrderAttribute att)
+				if (typeof(T).GetCustomAttributes(typeof(PKOrderAttribute), inherit: true).FirstOrDefault() is PKOrderAttribute att)
 					_static_orderByAttrVal = att.PKOrder.NullIfEmptyTrimmed();
 			}
 
 			// OrderByClauseFinal
-			if(_static_orderByAttrVal.NotNulle() && PKOrder.IsNulle())
+			if (_static_orderByAttrVal.NotNulle() && PKOrder.IsNulle())
 				PKOrder = _static_orderByAttrVal.ToString();
 
-			if(_t.TableMeta == null) {
+			if (_t.TableMeta == null)
+			{
 				_t.TableMeta = TableMeta.Copy();
 			}
 		}
@@ -253,7 +257,7 @@ namespace EntityFX.Core
 		public virtual void Add(T entity)
 		{
 			var dbEntityEntry = _dbContext.Entry(entity);
-			if(dbEntityEntry.State != EntityState.Detached)
+			if (dbEntityEntry.State != EntityState.Detached)
 				dbEntityEntry.State = EntityState.Added;
 			else
 				_dbSet.Add(entity);
@@ -269,9 +273,9 @@ namespace EntityFX.Core
 		/// </summary>
 		public virtual void Upsert(T entity)
 		{
-			if(entity == null)
+			if (entity == null)
 				throw new ArgumentNullException();
-			if(IdNotSet(entity)) // GetIdFromT(entity).Equals(_defaultId)) // entity.Id.Equals(_defaultId))
+			if (IdNotSet(entity)) // GetIdFromT(entity).Equals(_defaultId)) // entity.Id.Equals(_defaultId))
 				Add(entity);
 			else
 				Update(entity);
@@ -284,14 +288,16 @@ namespace EntityFX.Core
 		/// <param name="entity"></param>
 		public virtual void Update(T entity)
 		{
-			if(entity == null)
+			if (entity == null)
 				throw new ArgumentException("Cannot add a null entity.");
 
 			var entry = _dbContext.Entry<T>(entity);
 
-			if(entry.State == EntityState.Detached) {
+			if (entry.State == EntityState.Detached)
+			{
 				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity)); // _getIdFromT(e).Equals(_getIdFromT(entity))); //e.Id.Equals(entity.Id));  // You need to have access to key
-				if(attachedEntity != null) {
+				if (attachedEntity != null)
+				{
 					var attachedEntry = _dbContext.Entry(attachedEntity);
 					attachedEntry.CurrentValues.SetValues(entity);
 				}
@@ -308,24 +314,27 @@ namespace EntityFX.Core
 		/// <param name="properties"></param>
 		public virtual void Update(T entity, params Expression<Func<T, object>>[] properties)
 		{
-			if(properties == null || properties.Length == 0)
+			if (properties == null || properties.Length == 0)
 				Update(entity);
-			else {
+			else
+			{
 
 				EntityEntry<T> entry = null;
 				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity)); // _getIdFromT(e).Equals(_getIdFromT(entity))); // e.Id.Equals(entity.Id));  // You need to have access to key
 
-				if(attachedEntity != null) {
+				if (attachedEntity != null)
+				{
 					entry = _dbContext.Entry(attachedEntity);
 					entry.CurrentValues.SetValues(entity);
 				}
 
-				if(entry == null) {
+				if (entry == null)
+				{
 					entry = _dbContext.Entry(entity);
 					_dbSet.Attach(entity);
 				}
 
-				foreach(var selector in properties)
+				foreach (var selector in properties)
 					entry.Property(selector).IsModified = true;
 			}
 		}
@@ -337,9 +346,10 @@ namespace EntityFX.Core
 		public virtual void Delete(T entity)
 		{
 			var dbEntityEntry = _dbContext.Entry(entity);
-			if(dbEntityEntry != null && dbEntityEntry.State != EntityState.Deleted)
+			if (dbEntityEntry != null && dbEntityEntry.State != EntityState.Deleted)
 				dbEntityEntry.State = EntityState.Deleted;
-			else {
+			else
+			{
 				_dbSet.Attach(entity);
 				_dbSet.Remove(entity);
 			}
@@ -350,11 +360,12 @@ namespace EntityFX.Core
 			bool _deleteDirect = deleteDirect != null
 				? (bool)deleteDirect
 				: DeleteDirectDefault; // _dbSettings.DeleteDirectByDefault;
-			if(_deleteDirect)
+			if (_deleteDirect)
 				return DeleteDirect(id);
-			else {
+			else
+			{
 				var entity = GetById(id);
-				if(entity != null) // not found; assume already deleted.
+				if (entity != null) // not found; assume already deleted.
 					Delete(entity);
 				return 0;
 			}
@@ -366,14 +377,14 @@ namespace EntityFX.Core
 
 		public virtual int Count(Expression<Func<T, bool>> predicate = null)
 		{
-			if(predicate == null)
+			if (predicate == null)
 				return _dbSet.Count();
 			return _dbSet.Count(predicate);
 		}
 
 		public virtual async Task<int> CountAsync(Expression<Func<T, bool>> predicate = null)
 		{
-			if(predicate == null)
+			if (predicate == null)
 				return await _dbSet.CountAsync();
 			return await _dbSet.CountAsync(predicate);
 		}
@@ -465,11 +476,6 @@ namespace EntityFX.Core
 			return result;
 		}
 
-		protected int __UpdateDirect(TId id, IEnumerable<SqlParam> cols)
-		{
-			int result = UpdateDirect(id, cols.ToArray());
-			return result;
-		}
 
 		protected async Task<int> __UpdateDirectAsync(TId id, string whereClause, params SqlParam[] args)
 		{
@@ -482,11 +488,12 @@ namespace EntityFX.Core
 			return result;
 		}
 
-		protected async Task<int> __UpdateDirectAsync(TId id, IEnumerable<SqlParam> cols)
-		{
-			int result = await UpdateDirectAsync(id, cols.ToArray());
-			return result;
-		}
+
+
+
+
+		// ---------
+
 
 		public virtual int UpdateDirect(TId id, params SqlParam[] updateColumns)
 		{
@@ -494,11 +501,10 @@ namespace EntityFX.Core
 			return result;
 		}
 
-		// ---------
 
 		public virtual int UpdateDirect(TId id, string updateColumnName, object value)
 		{
-			return UpdateDirect(id, new SqlParam(updateColumnName, value));
+			return __UpdateDirect(id, null, new SqlParam(updateColumnName, value));
 		}
 
 		public virtual int UpdateDirect(params SqlParam[] updateColumns)
@@ -509,7 +515,7 @@ namespace EntityFX.Core
 
 		public virtual int UpdateDirect(string whereClause, params SqlParam[] updateColumns)
 		{
-			if(whereClause.IsNulle()) throw new ArgumentNullException();
+			if (whereClause.IsNulle()) throw new ArgumentNullException();
 			// note: we allow them to send in with no where filter, but do not allow
 			// if they called this clause that exects it, for safety's sake
 			int result = __UpdateDirect(_defaultId, whereClause, updateColumns);
@@ -520,7 +526,7 @@ namespace EntityFX.Core
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, string updateColumnName, object value)
 		{
-			return await UpdateDirectAsync(id, new SqlParam(updateColumnName, value));
+			return await __UpdateDirectAsync(id, null, new SqlParam(updateColumnName, value));
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params SqlParam[] updateColumns)
@@ -537,7 +543,7 @@ namespace EntityFX.Core
 
 		public async virtual Task<int> UpdateDirectAsync(string whereClause, params SqlParam[] updateColumns)
 		{
-			if(whereClause.IsNulle()) throw new ArgumentNullException();
+			if (whereClause.IsNulle()) throw new ArgumentNullException();
 			// note: we allow them to send in with no where filter, but do not allow
 			// if they called this clause that exects it, for safety's sake
 			int result = await __UpdateDirectAsync(_defaultId, whereClause, updateColumns);
@@ -549,30 +555,30 @@ namespace EntityFX.Core
 		public async virtual Task<int> UpdateDirectAsync(TId id, Func<TTableDef, string> exp, object value)
 		{
 			string key = exp(_t);
-			int result = await UpdateDirectAsync(id, new SqlParam(key, value));
+			int result = await __UpdateDirectAsync(id, null, new SqlParam(key, value));
 			return result;
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, Func<TTableDef, KeyValuePair<string, object>> exp)
 		{
 			var ko = exp(_t);
-			int result = await UpdateDirectAsync(id, new SqlParam(ko.Key, ko.Value));
+			int result = await __UpdateDirectAsync(id, null, new SqlParam(ko.Key, ko.Value));
 			return result;
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params KeyValuePair<string, object>[] vals)
 		{
-			return await __UpdateDirectAsync(id, vals.Select(k => new SqlParam(k.Key, k.Value)));
+			return await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params KV[] vals)
 		{
-			return await __UpdateDirectAsync(id, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)));
+			return await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, Func<TTableDef, IEnumerable<KeyValuePair<string, object>>> exp)
 		{
-			return await __UpdateDirectAsync(id, exp(_t).Select(k => new SqlParam(k.Key, k.Value)));
+			return await __UpdateDirectAsync(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 		// ---------
@@ -580,30 +586,30 @@ namespace EntityFX.Core
 		public virtual int UpdateDirect(TId id, Func<TTableDef, string> exp, object value)
 		{
 			string key = exp(_t);
-			int result = UpdateDirect(id, new SqlParam(key, value));
+			int result = __UpdateDirect(id, null, new SqlParam(key, value));
 			return result;
 		}
 
 		public virtual int UpdateDirect(TId id, Func<TTableDef, KeyValuePair<string, object>> exp)
 		{
 			var ko = exp(_t);
-			int result = UpdateDirect(id, new SqlParam(ko.Key, ko.Value));
+			int result = __UpdateDirect(id, null, new SqlParam(ko.Key, ko.Value));
 			return result;
 		}
 
 		public virtual int UpdateDirect(TId id, params KeyValuePair<string, object>[] vals)
 		{
-			return __UpdateDirect(id, vals.Select(k => new SqlParam(k.Key, k.Value)));
+			return __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 		public virtual int UpdateDirect(TId id, params KV[] vals)
 		{
-			return __UpdateDirect(id, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)));
+			return __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
 		}
 
 		public virtual int UpdateDirect(TId id, Func<TTableDef, IEnumerable<KeyValuePair<string, object>>> exp)
 		{
-			return __UpdateDirect(id, exp(_t).Select(k => new SqlParam(k.Key, k.Value)));
+			return __UpdateDirect(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 
@@ -688,7 +694,7 @@ namespace EntityFX.Core
 		string _DeleteDirectStrWhere(string colName, object value, string operatr)
 		{
 			string val = value?.ToString();
-			if(colName.IsNulle() || operatr.IsNulle() || val.IsNulle())
+			if (colName.IsNulle() || operatr.IsNulle() || val.IsNulle())
 				throw new ArgumentNullException();
 			string sql = $"DELETE {FullTableName} WHERE {colName} {operatr} {val}";
 			return sql;
@@ -728,16 +734,17 @@ namespace EntityFX.Core
 
 		protected KeyValuePair<string, SqlParam[]> __UpdateDirectHelper(TId id, string whereClause, ref SqlParam[] args)
 		{
-			if(args != null)
+			if (args != null)
 				args = args.Where(a => a != null).ToArray();
-			if(args.IsNulle())
+			if (args.IsNulle())
 				throw new ArgumentNullException(); // huh? why was this required to always have args?
 
 			string columnsSets = _GetParametersString(true, args);
 
 			bool hasId = id != null && !id.Equals(_defaultId);
-			if(hasId) {
-				if(whereClause.NotNulle())
+			if (hasId)
+			{
+				if (whereClause.NotNulle())
 					throw new ArgumentException("Id and WHERE clause cannot both be set.");
 
 				whereClause = $"WHERE {IdName} = @{IdName}";
@@ -762,15 +769,17 @@ SET {columnsSets}
 
 		protected SqlParam[] _CombineIdWithArgs(TId id, params SqlParam[] args)
 		{
-			if(id == null)
+			if (id == null)
 				return args;
 
 			var idParam = new SqlParam(IdName, IdToString(id));
-			if(args == null) {
+			if (args == null)
+			{
 				args = new SqlParam[1];
 				args[0] = idParam;
 			}
-			else {
+			else
+			{
 				var items = new List<SqlParam>(args.Length + 1);
 				items.Add(idParam);
 				items.AddRange(args);
@@ -795,26 +804,29 @@ SET {columnsSets}
 		protected string _GetParametersString(bool updateSet_notProcCall, string procName, params SqlParam[] args)
 		{
 			var sb = new StringBuilder(120);
-			if(procName != null)
+			if (procName != null)
 				sb.Append("EXEC ")
 				  .Append(procName);
 
-			if(args.NotNulle()) {
-				for(int i = 0; i < args.Length; i++) {
+			if (args.NotNulle())
+			{
+				for (int i = 0; i < args.Length; i++)
+				{
 					var p = args[i];
-					if(p != null) {
-						if(p.Value == null)
+					if (p != null)
+					{
+						if (p.Value == null)
 							p.Value = DBNull.Value;
-						if(updateSet_notProcCall)
+						if (updateSet_notProcCall)
 							sb.AppendFormat(" [{0}] = @{0},", args[i].Name); //.ParameterName);
 						else
 							sb.Append(" @").Append(args[i].Name).Append(",");
 					}
 				}
-				if(sb[sb.Length - 1] == ',')
+				if (sb[sb.Length - 1] == ',')
 					sb.Length -= 1;
 			}
-			if(sb.Length > 0 && sb[0] == ' ')
+			if (sb.Length > 0 && sb[0] == ' ')
 				return sb.ToString(1, sb.Length - 1);
 			return sb.ToString();
 		}
@@ -823,7 +835,7 @@ SET {columnsSets}
 
 		protected void __PrepQueryIfNeeded(SQLQuery query)
 		{
-			if(query.TableNameFull == null)
+			if (query.TableNameFull == null)
 				query.TableNameFull = this.FullTableName;
 		}
 
