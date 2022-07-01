@@ -1,8 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <VersionPrefix>4.0.3</VersionPrefix>
+    <VersionPrefix>4.1.0</VersionPrefix>
     <RootNamespace>EntityFX.Core</RootNamespace>
     <Authors>Nicholas Petersen</Authors>
     <RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
@@ -11,16 +10,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
     <PackageReleaseNotes />
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Description></Description>
     <NoWarn>1701;1702;1591;</NoWarn>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\EntityFX.Core.Base.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\EntityFX.Core.Base.xml</DocumentationFile>
-  </PropertyGroup>
-
 </Project>
