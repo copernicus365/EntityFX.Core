@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -20,7 +20,7 @@ namespace EntityFX.Core
 
 		public SelectColumns(ITableMetaInfoBasic t)
 		{
-			if (t == null) throw new ArgumentNullException(nameof(t));
+			if(t == null) throw new ArgumentNullException(nameof(t));
 			_TableColumnNames = t.TableColumnNames;
 			_EntityPropertyNames = t.EntityPropertyNames;
 		}
@@ -35,7 +35,7 @@ namespace EntityFX.Core
 
 		public SelectColumns __Except(IEnumerable<string> except)
 		{
-			if (except != null) {
+			if(except != null) {
 
 				if(ExceptCols == null)
 					ExceptCols = new Dictionary<string, bool>();
@@ -75,12 +75,12 @@ namespace EntityFX.Core
 
 		public SelectColumns NullifyColumns(params string[] cols)
 		{
-			if (cols.NotNulle()) {
-				foreach (string col in cols) {
-					if (col.IsNulle())
+			if(cols.NotNulle()) {
+				foreach(string col in cols) {
+					if(col.IsNulle())
 						throw new ArgumentNullException();
 
-					if (ReplaceCols == null)
+					if(ReplaceCols == null)
 						ReplaceCols = new Dictionary<string, string>();
 					ReplaceCols[col] = "NULL AS " + col;
 				}
@@ -90,9 +90,9 @@ namespace EntityFX.Core
 
 		public SelectColumns Replace(string match, string replace)
 		{
-			if (match != null) {
-				if (replace.IsNulle()) throw new ArgumentNullException();
-				if (ReplaceCols == null) ReplaceCols = new Dictionary<string, string>();
+			if(match != null) {
+				if(replace.IsNulle()) throw new ArgumentNullException();
+				if(ReplaceCols == null) ReplaceCols = new Dictionary<string, string>();
 				ReplaceCols[match] = replace;
 			}
 			return this;
@@ -110,8 +110,8 @@ namespace EntityFX.Core
 
 		public SelectColumns Add(string select)
 		{
-			if (select.NotNulle()) {
-				if (Adds == null) Adds = new List<string>();
+			if(select.NotNulle()) {
+				if(Adds == null) Adds = new List<string>();
 				Adds.Add(select);
 			}
 			return this;
@@ -121,7 +121,7 @@ namespace EntityFX.Core
 
 		bool hasAs(string val)
 		{
-			if (val.IsNulle()) return false;
+			if(val.IsNulle()) return false;
 			return rxHasAS.Match(val).Success;
 		}
 
@@ -134,12 +134,12 @@ namespace EntityFX.Core
 			bool replaceEmpty = ReplaceCols.IsNulle();
 
 			string c = null;
-			if (!exceptEmpty || !replaceEmpty) {
-				for (int i = 0; i < cols.Length; i++) {
+			if(!exceptEmpty || !replaceEmpty) {
+				for(int i = 0; i < cols.Length; i++) {
 					c = cols[i];
-					if (!exceptEmpty && ExceptCols.ContainsKey(c))
+					if(!exceptEmpty && ExceptCols.ContainsKey(c))
 						cols[i] = null;
-					else if (!replaceEmpty && ReplaceCols.ContainsKey(c)) {
+					else if(!replaceEmpty && ReplaceCols.ContainsKey(c)) {
 						cols[i] = ReplaceCols[c];
 					}
 				}
@@ -147,11 +147,11 @@ namespace EntityFX.Core
 
 			// STEP 2
 
-			for (int i = 0; i < cols.Length; i++) {
+			for(int i = 0; i < cols.Length; i++) {
 				c = cols[i];
-				if (c != null) {
-					if (ecols[i] != null && !hasAs(c)) {
-						if (c == _TableColumnNames[i]) // removed! Not needed! `cols` came from TableColumns, 
+				if(c != null) {
+					if(ecols[i] != null && !hasAs(c)) {
+						if(c == _TableColumnNames[i]) // removed! Not needed! `cols` came from TableColumns, 
 							c = $"[{c}]"; //"[" + c + "]";
 						cols[i] = $"{c} AS [{ecols[i]}]"; // c + " AS [" + ecols[i] + "]";
 					}
@@ -159,7 +159,7 @@ namespace EntityFX.Core
 			}
 
 			var vals = cols.Where(v => v.NotNulle());
-			if (Adds.NotNulle())
+			if(Adds.NotNulle())
 				vals = vals.Concat(Adds);
 			string[] final = vals.ToArray();
 			return final;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EntityFX.Core
@@ -21,7 +21,7 @@ namespace EntityFX.Core
 		public static string GetTableDefinitionsCodeForAllDbSets(
 			this ITableMetaInfoBuilder tmiBldr,
 			TDCodeGenerator codeGenOps = null,
-			bool withNamespace = true) 
+			bool withNamespace = true)
 			=> GetTableDefinitionsCodeForEntityTypes(
 				tmiBldr,
 				tmiBldr.GetEntityTypes(),

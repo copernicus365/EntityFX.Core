@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace EntityFX.Core
 {
@@ -27,7 +27,7 @@ namespace EntityFX.Core
 			Value = value;
 		}
 
-		public override string ToString() 
+		public override string ToString()
 			=> $"[{Key}, {Value}]";
 	}
 }

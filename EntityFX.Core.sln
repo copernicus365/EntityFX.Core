@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27705.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFX.Core.Base", "EntityFX.Core.Base\EntityFX.Core.Base.csproj", "{C1FF5525-9A6B-4C64-B0DB-58459DF31DAF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFX.Core", "EntityFX.Core\EntityFX.Core.csproj", "{97F412D7-1687-4472-86B1-DDD82245624C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.EntityFX.Core", "Test.EntityFX.Core\Test.EntityFX.Core.csproj", "{AD700C73-C715-410E-AC02-76B76A5AA495}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{97F412D7-1687-4472-86B1-DDD82245624C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97F412D7-1687-4472-86B1-DDD82245624C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97F412D7-1687-4472-86B1-DDD82245624C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD700C73-C715-410E-AC02-76B76A5AA495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD700C73-C715-410E-AC02-76B76A5AA495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD700C73-C715-410E-AC02-76B76A5AA495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD700C73-C715-410E-AC02-76B76A5AA495}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

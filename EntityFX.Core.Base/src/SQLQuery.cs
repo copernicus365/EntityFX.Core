@@ -1,10 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-//using System.Linq.Expressions;
-//using System.Data.SqlClient;
 
 namespace EntityFX.Core
 {
@@ -52,7 +49,7 @@ namespace EntityFX.Core
 			return this;
 		}
 
-	
+
 
 		#region RANGE
 
@@ -91,7 +88,7 @@ namespace EntityFX.Core
 			SelectVal = selects.Where(s => s.NotNulle()).JoinToString(",\r\n");
 			return this;
 		}
-		
+
 		public SQLQuery SelectClause(string selectClause = "*")
 		{
 			SelectVal = selectClause;
@@ -107,7 +104,7 @@ namespace EntityFX.Core
 
 		public SQLQuery SelectAllExcept(params string[] exceptCols)
 		{
-			if (TableColumnNames.NotNulle())
+			if(TableColumnNames.NotNulle())
 				return Select(new SelectColumns(this).Except(exceptCols));
 			return SelectClause("*");
 		}
@@ -131,7 +128,7 @@ namespace EntityFX.Core
 				.Select(
 					new SelectColumns(this)
 					.NullifyColumns(cols));
-					//.Replace(columnNameToNull, "NULL AS " + columnNameToNull));
+			//.Replace(columnNameToNull, "NULL AS " + columnNameToNull));
 		}
 
 		#endregion
@@ -166,7 +163,7 @@ namespace EntityFX.Core
 
 
 		#region WHERE
-	
+
 		public SQLQuery Where(string whereClause)
 		{
 			_AddWhereClause(whereClause);
@@ -231,12 +228,12 @@ namespace EntityFX.Core
 		SQLQuery __WhereOrSet(bool isWhere, string name, object value, string operatr = "=")
 		{
 			name = name.Trim();
-			if (name[0] == '@')
+			if(name[0] == '@')
 				name = name.Substring(1);
 
 			string argName = string.Format("@{0}_{1}", _argsIncr++, name);
 
-			if (value == null)
+			if(value == null)
 				value = DBNull.Value;
 
 			if(operatr.Equals("IN", StringComparison.OrdinalIgnoreCase)) {
@@ -246,29 +243,25 @@ namespace EntityFX.Core
 				Args.Add(new SqlParam(argName, value));
 
 			string cls = string.Format("{0} {1} {2}", name, operatr, argName);
-			if (isWhere)
+			if(isWhere)
 				_AddWhereClause(cls);
 			else
 				_AddSetClause(cls);
 			return this;
 		}
 
-		public string GetWhereClause
-		{
-			get
-			{
-				if (WhereClauses.IsNulle())
+		public string GetWhereClause {
+			get {
+				if(WhereClauses.IsNulle())
 					return null;
 				string whr = WhereClauses.JoinToString(" AND ");
 				return whr;
 			}
 		}
 
-		public string GetSetClause
-		{
-			get
-			{
-				if (SetClauses.IsNulle())
+		public string GetSetClause {
+			get {
+				if(SetClauses.IsNulle())
 					return null;
 				return SetClauses.JoinToString(",\r\n");
 			}
@@ -276,29 +269,29 @@ namespace EntityFX.Core
 
 		void _AddWhereClause(string w, bool prep = true)
 		{
-			if (prep)
+			if(prep)
 				w = _PrepWhereOrSet(w, "WHERE");
-			if (w.NotNulle())
+			if(w.NotNulle())
 				WhereClauses.Add(w);
 		}
 
 		void _AddSetClause(string s, bool prep = true)
 		{
-			if (prep)
+			if(prep)
 				s = _PrepWhereOrSet(s, "SET");
-			if (s.NotNulle())
+			if(s.NotNulle())
 				SetClauses.Add(s);
 		}
 
 		string _PrepWhereOrSet(string s, string baseWord)
 		{
-			if (s != null)
+			if(s != null)
 				s = s.Trim();
-			if (s.IsNulle())
+			if(s.IsNulle())
 				return null;
 
 			int len = baseWord.Length;
-			if (s.StartsWith(baseWord, StringComparison.OrdinalIgnoreCase) && s.Length > len && char.IsWhiteSpace(s[len]))
+			if(s.StartsWith(baseWord, StringComparison.OrdinalIgnoreCase) && s.Length > len && char.IsWhiteSpace(s[len]))
 				s = s.Substring(len + 1).Trim();
 			return s;
 		}
@@ -310,7 +303,7 @@ namespace EntityFX.Core
 		public string ToSQL()
 		{
 			string val = ToSQL(out SqlParam[] sqlArgs);
-			if (sqlArgs.NotNulle())
+			if(sqlArgs.NotNulle())
 				throw new ArgumentNullException("SqlParameters were set as an out parameter, which means you must call the overload that accepts the out SqlParam[] sqlArgs.");
 			return val;
 		}
@@ -325,24 +318,24 @@ namespace EntityFX.Core
 			//  OrderByVal = TabelDef?.GroupByClause; 
 			//  OrderByVal = TabelDef.GroupByClause; //was: tableDefqqq.TableInfo.IndexInfo.OrderByClause;
 
-			if (TableNameFull.IsNulle())
+			if(TableNameFull.IsNulle())
 				throw new ArgumentNullException("tableName");
 
-			if (hasRange && OrderByClause.IsNulle())
+			if(hasRange && OrderByClause.IsNulle())
 				throw new ArgumentNullException("OrderBy clause required in Range query.");
 
 			sqlArgs = GetSqlParameters.ToArray();
-			if (sqlArgs.IsNulle()) sqlArgs = null;
+			if(sqlArgs.IsNulle()) sqlArgs = null;
 
 			// SELECT
 			var sb = new StringBuilder();
 
-			if (SelectVal.NotNulle()) { 
-			sb.AppendFormat(
-@"SELECT {0}
+			if(SelectVal.NotNulle()) {
+				sb.AppendFormat(
+	@"SELECT {0}
 FROM {1}", SelectVal, TableNameFull);
 			}
-			else if (SetClauses.NotNulle()) {
+			else if(SetClauses.NotNulle()) {
 				sb.AppendFormat(
 @"UPDATE {0}
 SET {1}", TableNameFull, GetSetClause);
@@ -354,21 +347,21 @@ SET {1}", TableNameFull, GetSetClause);
 
 			// WHERE
 			string whr = GetWhereClause;
-			if (whr.NotNulle()) {
+			if(whr.NotNulle()) {
 				sb.Append(
 @"WHERE ");
 				sb.AppendLine(whr);
 			}
 
 			// ORDERBY
-			if (SelectVal.NotNulle()) {
-				if (hasRange && OrderByClause.IsNulle()) {
+			if(SelectVal.NotNulle()) {
+				if(hasRange && OrderByClause.IsNulle()) {
 					throw new ArgumentNullException($"SQL range query requires {OrderByClause} to be set.");
 					// NEW, didn't throw on this prior to 2018-05-24, not sure why we didn't, 
 					// but just in case this shouldn't throw... this note
 				}
 
-				if (OrderByClause.NotNulle()) {
+				if(OrderByClause.NotNulle()) {
 					sb.Append(
 	@"ORDER BY ");
 					sb.AppendLine(OrderByClause);
@@ -376,11 +369,11 @@ SET {1}", TableNameFull, GetSetClause);
 			}
 
 			// RANGE
-			if (hasRange) {
+			if(hasRange) {
 				sb.AppendLine("OFFSET @Offset ROWS FETCH FIRST @Count ROWS ONLY");
 			}
 
-			if (NextQueryVal != null) {
+			if(NextQueryVal != null) {
 
 				sb.TrimEnd();
 				sb.AppendLine(";\r\n");
@@ -397,16 +390,14 @@ SET {1}", TableNameFull, GetSetClause);
 			return result;
 		}
 
-		public IEnumerable<SqlParam> GetSqlParameters
-		{
-			get
-			{
-				if (StartVal > 0 || CountVal > 0) {
+		public IEnumerable<SqlParam> GetSqlParameters {
+			get {
+				if(StartVal > 0 || CountVal > 0) {
 					yield return new SqlParam("@Offset", StartVal);
 					yield return new SqlParam("@Count", CountVal);
 				}
-				if (Args.NotNulle()) {
-					foreach (var arg in Args)
+				if(Args.NotNulle()) {
+					foreach(var arg in Args)
 						yield return arg;
 				}
 			}

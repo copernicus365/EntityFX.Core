@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -19,7 +19,7 @@ namespace EntityFX.Core
 	{
 		public DbRepositoryCore(DbContext dbContext) : base(dbContext) { }
 	}
-	
+
 	public abstract class DbRepositoryCore<T, TId, TTableDef> :
 		IDbRepositoryCoreTD<T, TId, TTableDef> where T : class
 		where TTableDef : ITableDefinition, new()
@@ -33,7 +33,7 @@ namespace EntityFX.Core
 		// === STATIC FIELDS ===
 
 		protected static string _tableName;
-		protected static TId _defaultId = default(TId);
+		protected static TId _defaultId = default;
 		protected static TTableDef _t = new TTableDef();
 
 		static bool _static_orderByAttrSet;
@@ -63,8 +63,10 @@ namespace EntityFX.Core
 		/// <para/>
 		/// <code>dbcontext.GetTableMetaInfo(typeof(T))</code>
 		/// </summary>
-		public TableMetaInfo TableMeta {
-			get {
+		public TableMetaInfo TableMeta
+		{
+			get
+			{
 				_TableInfo = GetNewTableInfo();
 				// note this is STATIC! will only need set ONCE for this generic DbRepo child type
 				if (_TableInfo == null)
@@ -94,7 +96,8 @@ namespace EntityFX.Core
 		protected void INIT()
 		{
 			// FIRST TIME STATIC SET
-			if (!_static_orderByAttrSet) {
+			if (!_static_orderByAttrSet)
+			{
 				_static_orderByAttrSet = true;
 
 				if (typeof(T).GetCustomAttributes(typeof(PKOrderAttribute), inherit: true).FirstOrDefault() is PKOrderAttribute att)
@@ -105,7 +108,8 @@ namespace EntityFX.Core
 			if (_static_orderByAttrVal.NotNulle() && PKOrder.IsNulle())
 				PKOrder = _static_orderByAttrVal.ToString();
 
-			if (_t.TableMeta == null) {
+			if (_t.TableMeta == null)
+			{
 				_t.TableMeta = TableMeta.Copy();
 			}
 		}
@@ -174,8 +178,8 @@ namespace EntityFX.Core
 		public virtual T GetById(TId id, bool? noTracking = null)
 		{
 			bool _asNoTracking = noTracking ?? AsNoTracking; // _dbSettings.AsNoTracking;
-			//if (!_asNoTracking)
-			//	return _dbSet.Find(id);
+															 //if (!_asNoTracking)
+															 //	return _dbSet.Find(id);
 			return WhereMatchTId(Get(_asNoTracking), id).FirstOrDefault(); // .FirstOrDefault(e => _getIdFromT(e).Equals(id));
 																		   //e.Id.Equals(id));
 																		   //PredicateBuilder.GetByIdPredicate<T>(id));
@@ -186,8 +190,8 @@ namespace EntityFX.Core
 		public virtual async Task<T> GetByIdAsync(TId id, bool? noTracking = null)
 		{
 			bool _asNoTracking = noTracking ?? AsNoTracking; // _dbSettings.AsNoTracking;
-			//if (!_asNoTracking)
-			//	return await _dbSet.FindAsync(id);
+															 //if (!_asNoTracking)
+															 //	return await _dbSet.FindAsync(id);
 			return await WhereMatchTId(Get(_asNoTracking), id).FirstOrDefaultAsync(); //Get(_asNoTracking).FirstOrDefaultAsync(e => _getIdFromT(e).Equals(id)); //e.Id.Equals(id));
 		}
 
@@ -289,9 +293,11 @@ namespace EntityFX.Core
 
 			var entry = _dbContext.Entry<T>(entity);
 
-			if (entry.State == EntityState.Detached) {
+			if (entry.State == EntityState.Detached)
+			{
 				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity)); // _getIdFromT(e).Equals(_getIdFromT(entity))); //e.Id.Equals(entity.Id));  // You need to have access to key
-				if (attachedEntity != null) {
+				if (attachedEntity != null)
+				{
 					var attachedEntry = _dbContext.Entry(attachedEntity);
 					attachedEntry.CurrentValues.SetValues(entity);
 				}
@@ -310,17 +316,20 @@ namespace EntityFX.Core
 		{
 			if (properties == null || properties.Length == 0)
 				Update(entity);
-			else {
+			else
+			{
 
 				EntityEntry<T> entry = null;
 				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity)); // _getIdFromT(e).Equals(_getIdFromT(entity))); // e.Id.Equals(entity.Id));  // You need to have access to key
 
-				if (attachedEntity != null) {
+				if (attachedEntity != null)
+				{
 					entry = _dbContext.Entry(attachedEntity);
 					entry.CurrentValues.SetValues(entity);
 				}
 
-				if (entry == null) {
+				if (entry == null)
+				{
 					entry = _dbContext.Entry(entity);
 					_dbSet.Attach(entity);
 				}
@@ -339,7 +348,8 @@ namespace EntityFX.Core
 			var dbEntityEntry = _dbContext.Entry(entity);
 			if (dbEntityEntry != null && dbEntityEntry.State != EntityState.Deleted)
 				dbEntityEntry.State = EntityState.Deleted;
-			else {
+			else
+			{
 				_dbSet.Attach(entity);
 				_dbSet.Remove(entity);
 			}
@@ -352,7 +362,8 @@ namespace EntityFX.Core
 				: DeleteDirectDefault; // _dbSettings.DeleteDirectByDefault;
 			if (_deleteDirect)
 				return DeleteDirect(id);
-			else {
+			else
+			{
 				var entity = GetById(id);
 				if (entity != null) // not found; assume already deleted.
 					Delete(entity);
@@ -396,17 +407,23 @@ namespace EntityFX.Core
 
 		protected int DbExecuteSqlCommand(string sql, params object[] args)
 		{
+			//int result = args.IsNulle()
+			//	? _db.ExecuteSqlCommand(sql)
+			//	: _db.ExecuteSqlCommand(sql, args);
 			int result = args.IsNulle()
-				? _db.ExecuteSqlCommand(sql)
-				: _db.ExecuteSqlCommand(sql, args);
+				? _db.ExecuteSqlRaw(sql)
+				: _db.ExecuteSqlRaw(sql, args);
 			return result;
 		}
 
 		protected async Task<int> DbExecuteSqlCommandAsync(string sql, params object[] args)
 		{
+			//int result = args.IsNulle()
+			//	? await _db.ExecuteSqlCommandAsync(sql)
+			//	: await _db.ExecuteSqlCommandAsync(sql, args); // TOTALLY stupid, if args is null, throws exception! but since it is a params, it should allow
 			int result = args.IsNulle()
-					? await _db.ExecuteSqlCommandAsync(sql)
-					: await _db.ExecuteSqlCommandAsync(sql, args); // TOTALLY stupid, if args is null, throws exception! but since it is a params, it should allow
+				? await _db.ExecuteSqlRawAsync(sql)
+				: await _db.ExecuteSqlRawAsync(sql, args); // TOTALLY stupid, if args is null, throws exception! but since it is a params, it should allow
 			return result;
 		}
 
@@ -459,11 +476,6 @@ namespace EntityFX.Core
 			return result;
 		}
 
-		protected int __UpdateDirect(TId id, IEnumerable<SqlParam> cols)
-		{
-			int result = UpdateDirect(id, cols.ToArray());
-			return result;
-		}
 
 		protected async Task<int> __UpdateDirectAsync(TId id, string whereClause, params SqlParam[] args)
 		{
@@ -476,11 +488,12 @@ namespace EntityFX.Core
 			return result;
 		}
 
-		protected async Task<int> __UpdateDirectAsync(TId id, IEnumerable<SqlParam> cols)
-		{
-			int result = await UpdateDirectAsync(id, cols.ToArray());
-			return result;
-		}
+
+
+
+
+		// ---------
+
 
 		public virtual int UpdateDirect(TId id, params SqlParam[] updateColumns)
 		{
@@ -488,11 +501,10 @@ namespace EntityFX.Core
 			return result;
 		}
 
-		// ---------
 
 		public virtual int UpdateDirect(TId id, string updateColumnName, object value)
 		{
-			return UpdateDirect(id, new SqlParam(updateColumnName, value));
+			return __UpdateDirect(id, null, new SqlParam(updateColumnName, value));
 		}
 
 		public virtual int UpdateDirect(params SqlParam[] updateColumns)
@@ -514,7 +526,7 @@ namespace EntityFX.Core
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, string updateColumnName, object value)
 		{
-			return await UpdateDirectAsync(id, new SqlParam(updateColumnName, value));
+			return await __UpdateDirectAsync(id, null, new SqlParam(updateColumnName, value));
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params SqlParam[] updateColumns)
@@ -543,30 +555,30 @@ namespace EntityFX.Core
 		public async virtual Task<int> UpdateDirectAsync(TId id, Func<TTableDef, string> exp, object value)
 		{
 			string key = exp(_t);
-			int result = await UpdateDirectAsync(id, new SqlParam(key, value));
+			int result = await __UpdateDirectAsync(id, null, new SqlParam(key, value));
 			return result;
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, Func<TTableDef, KeyValuePair<string, object>> exp)
 		{
 			var ko = exp(_t);
-			int result = await UpdateDirectAsync(id, new SqlParam(ko.Key, ko.Value));
+			int result = await __UpdateDirectAsync(id, null, new SqlParam(ko.Key, ko.Value));
 			return result;
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params KeyValuePair<string, object>[] vals)
 		{
-			return await __UpdateDirectAsync(id, vals.Select(k => new SqlParam(k.Key, k.Value)));
+			return await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params KV[] vals)
 		{
-			return await __UpdateDirectAsync(id, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)));
+			return await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, Func<TTableDef, IEnumerable<KeyValuePair<string, object>>> exp)
 		{
-			return await __UpdateDirectAsync(id, exp(_t).Select(k => new SqlParam(k.Key, k.Value)));
+			return await __UpdateDirectAsync(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 		// ---------
@@ -574,30 +586,30 @@ namespace EntityFX.Core
 		public virtual int UpdateDirect(TId id, Func<TTableDef, string> exp, object value)
 		{
 			string key = exp(_t);
-			int result = UpdateDirect(id, new SqlParam(key, value));
+			int result = __UpdateDirect(id, null, new SqlParam(key, value));
 			return result;
 		}
 
 		public virtual int UpdateDirect(TId id, Func<TTableDef, KeyValuePair<string, object>> exp)
 		{
 			var ko = exp(_t);
-			int result = UpdateDirect(id, new SqlParam(ko.Key, ko.Value));
+			int result = __UpdateDirect(id, null, new SqlParam(ko.Key, ko.Value));
 			return result;
 		}
 
 		public virtual int UpdateDirect(TId id, params KeyValuePair<string, object>[] vals)
 		{
-			return __UpdateDirect(id, vals.Select(k => new SqlParam(k.Key, k.Value)));
+			return __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 		public virtual int UpdateDirect(TId id, params KV[] vals)
 		{
-			return __UpdateDirect(id, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)));
+			return __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
 		}
 
 		public virtual int UpdateDirect(TId id, Func<TTableDef, IEnumerable<KeyValuePair<string, object>>> exp)
 		{
-			return __UpdateDirect(id, exp(_t).Select(k => new SqlParam(k.Key, k.Value)));
+			return __UpdateDirect(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 		}
 
 
@@ -691,7 +703,7 @@ namespace EntityFX.Core
 		string _DeleteDirectStr(TId id, NameValueMatch nvm)
 		{
 			// whoa: this needs to change!!! use parameters...
-			string sql = $"DELETE {FullTableName} WHERE {IdName} = {IdToString(id)} AND {nvm.ToString()}";
+			string sql = $"DELETE {FullTableName} WHERE {IdName} = {IdToString(id)} AND {nvm}";
 			return sql;
 		}
 
@@ -711,7 +723,7 @@ namespace EntityFX.Core
 
 		public int DeleteDirect(NameValueMatch nvm)
 		{
-			string sql = $"DELETE {FullTableName} WHERE {nvm.ToString()}";
+			string sql = $"DELETE {FullTableName} WHERE {nvm}";
 			return DbExecuteSqlCommand(sql);
 		}
 
@@ -730,7 +742,8 @@ namespace EntityFX.Core
 			string columnsSets = _GetParametersString(true, args);
 
 			bool hasId = id != null && !id.Equals(_defaultId);
-			if (hasId) {
+			if (hasId)
+			{
 				if (whereClause.NotNulle())
 					throw new ArgumentException("Id and WHERE clause cannot both be set.");
 
@@ -760,11 +773,13 @@ SET {columnsSets}
 				return args;
 
 			var idParam = new SqlParam(IdName, IdToString(id));
-			if (args == null) {
+			if (args == null)
+			{
 				args = new SqlParam[1];
 				args[0] = idParam;
 			}
-			else {
+			else
+			{
 				var items = new List<SqlParam>(args.Length + 1);
 				items.Add(idParam);
 				items.AddRange(args);
@@ -793,10 +808,13 @@ SET {columnsSets}
 				sb.Append("EXEC ")
 				  .Append(procName);
 
-			if (args.NotNulle()) {
-				for (int i = 0; i < args.Length; i++) {
+			if (args.NotNulle())
+			{
+				for (int i = 0; i < args.Length; i++)
+				{
 					var p = args[i];
-					if (p != null) {
+					if (p != null)
+					{
 						if (p.Value == null)
 							p.Value = DBNull.Value;
 						if (updateSet_notProcCall)
@@ -806,7 +824,7 @@ SET {columnsSets}
 					}
 				}
 				if (sb[sb.Length - 1] == ',')
-					sb.Length = sb.Length - 1;
+					sb.Length -= 1;
 			}
 			if (sb.Length > 0 && sb[0] == ' ')
 				return sb.ToString(1, sb.Length - 1);
@@ -834,7 +852,7 @@ SET {columnsSets}
 
 			string code = TDCodeGeneratorX.GetTableDefinitionsCodeForEntityTypes(
 				tmiBldr,
-				tmiBldr.GetEntityTypes(), 
+				tmiBldr.GetEntityTypes(),
 				codeGenOps,
 				withNamespace);
 
