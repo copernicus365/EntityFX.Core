@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -85,6 +85,7 @@ namespace EntityFX.Core
 		TableMetaInfo GetNewTableInfo();
 		int SaveChanges();
 		Task<int> SaveChangesAsync();
+		Task<int> SetIdentityInsert(bool turnOn);
 		int UpdateDirect(params SqlParam[] updateColumns);
 		int UpdateDirect(string whereClause, params SqlParam[] updateColumns);
 		Task<int> UpdateDirectAsync(params SqlParam[] updateColumns);
