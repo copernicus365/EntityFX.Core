@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <VersionPrefix>4.3.0-alphaef61</VersionPrefix>
+    <VersionPrefix>5.0.0</VersionPrefix>
     <RootNamespace>EntityFX.Core</RootNamespace>
     <Authors>Nicholas Petersen</Authors>
     <RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
