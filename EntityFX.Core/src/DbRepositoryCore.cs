@@ -44,15 +44,8 @@ namespace EntityFX.Core
 		//public TTableDef t => _t;
 		public virtual TTableDef t { get; } = _t;
 
-		protected static TableMetaInfo _TableInfo;
+		public static TableMetaInfo _TableInfo;
 		protected static TableDefinition TD;
-
-		static void SetTabelInfo(TableMetaInfo tableMetaInfo)
-		{
-			_TableInfo = tableMetaInfo;
-			_tableName = _TableInfo.TableNameFull;
-
-		}
 
 		/// <summary>
 		/// TableInfo, is backed by a STATIC field for this repo generic type,
@@ -65,13 +58,26 @@ namespace EntityFX.Core
 		/// </summary>
 		public TableMetaInfo TableMeta {
 			get {
-				_TableInfo = GetNewTableInfo();
 				// note this is STATIC! will only need set ONCE for this generic DbRepo child type
 				if(_TableInfo == null)
-					SetTabelInfo(GetNewTableInfo());
+					SetTableInfo(GetNewTableInfo());
 				return _TableInfo;
 			}
 		}
+
+		public static void SetTableInfo(TableMetaInfo meta)
+		{
+			_TableInfo = meta;
+			_tableName = _TableInfo.TableNameFull;
+		}
+
+		public TableMetaInfo GetNewTableInfo()
+		{
+			ITableMetaInfoBuilder tableMeta = _dbContext.GetTableMetaInfoBuilder();
+			var meta = tableMeta.GetTableMetaInfo(typeof(T));
+			return meta;
+		}
+
 
 		/// <summary>
 		/// Returns an instance of 
@@ -448,11 +454,6 @@ namespace EntityFX.Core
 		}
 
 
-		public TableMetaInfo GetNewTableInfo()
-		{
-			ITableMetaInfoBuilder tableMeta = _dbContext.GetTableMetaInfoBuilder();
-			return tableMeta.GetTableMetaInfo(typeof(T));
-		}
 
 		public SQLQuery GetSQLQuery()
 		{
