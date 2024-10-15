@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace EntityFX.Core;
 
@@ -24,7 +25,8 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 
 	// === STATIC FIELDS ===
 
-	protected static TId _defaultId = default;
+	public static string FullTableName { get; private set; }
+	public static string IdName { get; set; } = "Id";
 
 
 	public DbRepositoryBasic(DbContext dbContext)
@@ -34,10 +36,15 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 		_dbContext = dbContext;
 		_dbSet = _dbContext.Set<T>();
 		_db = _dbContext.Database;
-		//context.Configuration.ValidateOnSaveEnabled = settings.ValidateOnSaveEnabled;
+
+		if(FullTableName == null) {
+			FullTableName = EFCoreXtensions.GetTableSchemaName<T>(_dbContext);
+		}
 	}
 
-	#region --- Abstract members (and any virtual members as prime candidates to consider implementing)  ---
+	#region --- abstract / virtual members  ---
+
+	public virtual string IdToString(TId id) => id?.ToString();
 
 	public abstract IQueryable<T> WhereMatchTId(IQueryable<T> source, TId id);
 
@@ -45,68 +52,94 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 
 	public abstract bool MatchesId(T item1, T item2);
 
+
 	public bool AsNoTracking { get; set; } = true;
 
-	public Func<IQueryable<T>, IOrderedQueryable<T>> GetPrimaryOrder { get; set; }
+	public Func<IQueryable<T>, IOrderedQueryable<T>> PrimaryOrder { get; set; }
 
 	#endregion
 
 
 	#region --- GET ---
 
-	public virtual T GetById(TId id, bool? noTracking = null)
+	public T GetById(TId id, bool? noTracking = null)
 		=> WhereMatchTId(Get(noTracking ?? AsNoTracking), id).FirstOrDefault();
 
-	public virtual async Task<T> GetByIdAsync(TId id, bool? noTracking = null)
+	public async Task<T> GetByIdAsync(TId id, bool? noTracking = null)
 		=> await WhereMatchTId(Get(noTracking ?? AsNoTracking), id).FirstOrDefaultAsync();
 
-	public virtual IQueryable<T> Get(bool? noTracking = null)
+	public IQueryable<T> Get(bool? noTracking = null)
 		=> noTracking ?? AsNoTracking ? _dbSet.AsNoTracking() : _dbSet;
+
+	/// <summary>
+	/// If <see cref="PrimaryOrder"/> is set, will pass the input <paramref name="source"/>
+	/// through that to have it's items returned in that ordered way. ELSE just returns
+	/// input source with no problems.
+	/// </summary>
+	/// <param name="source"></param>
+	/// <returns></returns>
+	public IQueryable<T> GET_PrimaryOrderedOrDefault(IQueryable<T> source)
+	{
+		ArgumentNullException.ThrowIfNull(source);
+
+		return PrimaryOrder == null
+			? source
+			: PrimaryOrder(source);
+	}
+
+	public IQueryable<T> GET_PrimaryOrderedOrDefault(bool? noTracking = null)
+	{
+		var q = Get(noTracking);
+		return PrimaryOrder == null
+			? q
+			: PrimaryOrder(q);
+	}
 
 	#endregion
 
+	#region --- GetRange ---
+
 	public IQueryable<T> GetRange(
 		int index,
 		int take,
+		Expression<Func<T, bool>> predicate = null,
 		bool? noTracking = null)
-		=> GetRange(Get(noTracking), index, take);
-
-	public IQueryable<T> GetRange(
-		IQueryable<T> source,
-		int index,
-		int take)
-	{
-		var q = (GetPrimaryOrder == null ? source : GetPrimaryOrder(source))
+	{	
+		var q = EFCoreXtensions.WhereIf(GET_PrimaryOrderedOrDefault(noTracking), predicate != null, predicate)
 			.Skip(index)
 			.Take(take);
 		return q;
 	}
 
 	public IQueryable<T> GetRange(
-		Expression<Func<T, bool>> predicate,
+		IQueryable<T> source,
 		int index,
 		int take,
-		bool? noTracking = null)
-		=> GetRange(Get(noTracking), predicate, index, take);
-
-	public IQueryable<T> GetRange(
-		IQueryable<T> source,
-		Expression<Func<T, bool>> predicate,
-		int index,
-		int take)
+		Expression<Func<T, bool>> predicate = null)
 	{
-		var q = (GetPrimaryOrder == null ? source : GetPrimaryOrder(source))
-			.Where(predicate)
+		var q = EFCoreXtensions.WhereIf(source, predicate != null, predicate)
 			.Skip(index)
 			.Take(take);
 		return q;
 	}
 
+	#endregion
 
 
-	// --- ADD ---
+	#region --- Count ---
 
-	public virtual void Add(T entity)
+	public int Count(Expression<Func<T, bool>> predicate = null)
+		=> predicate == null ? _dbSet.Count() : _dbSet.Count(predicate);
+
+	public async Task<int> CountAsync(Expression<Func<T, bool>> predicate = null)
+		=> predicate == null ? await _dbSet.CountAsync() : await _dbSet.CountAsync(predicate);
+
+	#endregion
+
+
+	// --- CUD ---
+
+	public void Add(T entity)
 	{
 		var dbEntityEntry = _dbContext.Entry(entity);
 		if(dbEntityEntry.State != EntityState.Detached)
@@ -116,14 +149,13 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 	}
 
 
-
 	#region --- UPDATE ---
 
 	/// <summary>
 	/// Adds the entity if the entity.Id is equal to default(T),
 	/// else Updates instead.
 	/// </summary>
-	public virtual void Upsert(T entity)
+	public void Upsert(T entity)
 	{
 		ArgumentNullException.ThrowIfNull(entity);
 		if(IdNotSet(entity)) // GetIdFromT(entity).Equals(_defaultId)) // entity.Id.Equals(_defaultId))
@@ -137,11 +169,11 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 	/// http://stackoverflow.com/a/12587752/264031
 	/// </summary>
 	/// <param name="entity"></param>
-	public virtual void Update(T entity)
+	public void Update(T entity)
 	{
 		ArgumentNullException.ThrowIfNull(entity);
 
-		var entry = _dbContext.Entry<T>(entity);
+		var entry = _dbContext.Entry(entity);
 
 		if(entry.State == EntityState.Detached) {
 			T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity)); // _getIdFromT(e).Equals(_getIdFromT(entity))); //e.Id.Equals(entity.Id));  // You need to have access to key
@@ -160,7 +192,7 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 	/// </summary>
 	/// <param name="entity"></param>
 	/// <param name="properties"></param>
-	public virtual void Update(T entity, params Expression<Func<T, object>>[] properties)
+	public void Update(T entity, params Expression<Func<T, object>>[] properties)
 	{
 		if(properties == null || properties.Length == 0)
 			Update(entity);
@@ -187,10 +219,9 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 	#endregion
 
 
-
 	#region --- DELETE ---
 
-	public virtual void Delete(T entity)
+	public void Delete(T entity)
 	{
 		var dbEntityEntry = _dbContext.Entry(entity);
 		if(dbEntityEntry != null && dbEntityEntry.State != EntityState.Deleted)
@@ -201,7 +232,7 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 		}
 	}
 
-	public virtual int Delete(TId id, bool? deleteDirect = null)
+	public int Delete(TId id)
 	{
 		var entity = GetById(id);
 		if(entity != null) // not found; assume already deleted.
@@ -209,18 +240,22 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 		return 0;
 	}
 
+
+	// --- DeleteDirect ---
+
+	string _DeleteDirectStr(TId id)
+	{
+		string sql = $"DELETE {FullTableName} WHERE {IdName} = {IdToString(id)}";
+		return sql;
+	}
+
+	public int DeleteDirect(TId id)
+		=> DbExecuteSqlCommand(_DeleteDirectStr(id));
+
+	public async Task<int> DeleteDirectAsync(TId id)
+		=> await DbExecuteSqlCommandAsync(_DeleteDirectStr(id));
+
 	#endregion
-
-
-
-	// --- Count ---
-
-	public virtual int Count(Expression<Func<T, bool>> predicate = null)
-		=> predicate == null ? _dbSet.Count() : _dbSet.Count(predicate);
-
-	public virtual async Task<int> CountAsync(Expression<Func<T, bool>> predicate = null)
-		=> predicate == null ? await _dbSet.CountAsync() : await _dbSet.CountAsync(predicate);
-
 
 
 	public int SaveChanges()
@@ -250,7 +285,31 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 		return result;
 	}
 
-	public void Dispose()
-		=> _dbContext?.Dispose();
+	//public void Dispose() => _dbContext?.Dispose();
+}
 
+internal static class EFCoreXtensions
+{
+	/// <summary>
+	/// Gets the Schema Table name for the DbSet.
+	/// Source: https://stackoverflow.com/a/69898129/264031
+	/// </summary>
+	internal static string GetTableSchemaName<T>(this DbContext context) where T : class
+	{
+		//DbContext context = dbSet.GetService<ICurrentDbContext>().Context;
+		System.Type entityType = typeof(T);
+		IEntityType m = context.Model.FindEntityType(entityType);
+		return m.GetSchemaQualifiedTableName();
+	}
+
+	internal static IQueryable<T> WhereIf<T>(IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicate)
+	{
+		if(condition)
+			return source.Where(predicate);
+		return source;
+	}
+
+	/// <summary>Gets the Schema Table name for the DbSet.</summary>
+	internal static string GetTableSchemaName<T>(this DbSet<T> dbSet) where T : class
+		=> GetTableSchemaName<T>(dbSet.GetService<ICurrentDbContext>().Context);
 }
