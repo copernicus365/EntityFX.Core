@@ -6,6 +6,7 @@
     <Authors>Nicholas Petersen</Authors>
     <RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
     <PackageProjectUrl>https://github.com/copernicus365/EntityFX.Core</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
@@ -14,4 +15,8 @@
     <Description></Description>
     <NoWarn>1701;1702;1591;</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 </Project>
