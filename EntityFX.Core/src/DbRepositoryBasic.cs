@@ -31,7 +31,7 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 
 	public DbRepositoryBasic(DbContext dbContext)
 	{
-		ArgumentNullException.ThrowIfNull(_dbContext);
+		ArgumentNullException.ThrowIfNull(dbContext);
 
 		_dbContext = dbContext;
 		_dbSet = _dbContext.Set<T>();
@@ -54,6 +54,15 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 
 
 	public bool AsNoTracking { get; set; } = true;
+
+	/// <summary>
+	/// Set to true in order to disable Upsert. Upsert must call
+	/// <see cref="IdNotSet"/>, but that is only useful on Identity types
+	/// (like with an integer Id), where at ADD time it's value is default.
+	/// While e.g. composite primary keys will always need to be set for both
+	/// Add and Update, in which case Upsert can't be called.
+	/// </summary>
+	public virtual bool DisableUpsert { get; }
 
 	public Func<IQueryable<T>, IOrderedQueryable<T>> PrimaryOrder { get; set; }
 
@@ -104,7 +113,7 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 		int take,
 		Expression<Func<T, bool>> predicate = null,
 		bool? noTracking = null)
-	{	
+	{
 		var q = EFCoreXtensions.WhereIf(GET_PrimaryOrderedOrDefault(noTracking), predicate != null, predicate)
 			.Skip(index)
 			.Take(take);
@@ -158,6 +167,8 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 	public void Upsert(T entity)
 	{
 		ArgumentNullException.ThrowIfNull(entity);
+		if(DisableUpsert) throw new Exception("UPSERT is disabled for this type, see `DisableUpsert` property");
+
 		if(IdNotSet(entity)) // GetIdFromT(entity).Equals(_defaultId)) // entity.Id.Equals(_defaultId))
 			Add(entity);
 		else
@@ -243,17 +254,20 @@ public abstract class DbRepositoryBasic<T, TId> : IDbRepositoryBasic<T, TId> whe
 
 	// --- DeleteDirect ---
 
-	string _DeleteDirectStr(TId id)
+	public virtual string GetDeleteDirectSQL(TId id)
 	{
 		string sql = $"DELETE {FullTableName} WHERE {IdName} = {IdToString(id)}";
 		return sql;
 	}
 
 	public int DeleteDirect(TId id)
-		=> DbExecuteSqlCommand(_DeleteDirectStr(id));
+		=> DbExecuteSqlCommand(GetDeleteDirectSQL(id));
 
 	public async Task<int> DeleteDirectAsync(TId id)
-		=> await DbExecuteSqlCommandAsync(_DeleteDirectStr(id));
+	{
+		string sql = GetDeleteDirectSQL(id);
+		return await DbExecuteSqlCommandAsync(sql);
+	}
 
 	#endregion
 
