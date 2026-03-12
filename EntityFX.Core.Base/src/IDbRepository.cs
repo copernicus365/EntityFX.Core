@@ -36,7 +36,6 @@ namespace EntityFX.Core
 		IQueryable<T> GetRange(int index, int take, bool? noTracking = null);
 		IQueryable<T> GetRange(IQueryable<T> source, Expression<Func<T, bool>> predicate, int index, int take);
 		IQueryable<T> GetRange(IQueryable<T> source, int index, int take);
-		IQueryable<T> GetTest(TId xyz);
 		bool IdNotSet(T item);
 		string IdToString(TId id);
 		bool MatchesId(T item1, T item2);

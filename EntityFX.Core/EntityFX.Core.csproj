@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <VersionPrefix>6.0.2</VersionPrefix>
+    <VersionPrefix>6.1.0</VersionPrefix>
     <RootNamespace>EntityFX.Core</RootNamespace>
     <Authors>Nicholas Petersen</Authors>
     <RepositoryUrl>https://github.com/copernicus365/EntityFX.Core</RepositoryUrl>
@@ -11,7 +11,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Entity Framework Core entity-framework-core EF EntityFrameworkCore EFCore repository</PackageTags>
-    <PackageReleaseNotes />
+    <PackageReleaseNotes>See CHANGELOG.md at: https://github.com/copernicus365/EntityFX.Core/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Description></Description>
     <NoWarn>1701;1702;1591;</NoWarn>

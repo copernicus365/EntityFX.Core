@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/root/">
+    <File Path="CHANGELOG.md" />
+  </Folder>
   <Project Path="EntityFX.Core.Base/EntityFX.Core.Base.csproj" />
   <Project Path="EntityFX.Core/EntityFX.Core.csproj" />
   <Project Path="Test.EntityFX.Core/Test.EntityFX.Core.csproj" />

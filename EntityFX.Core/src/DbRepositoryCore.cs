@@ -41,7 +41,6 @@ namespace EntityFX.Core
 
 		// --- Properties ---
 
-		//public TTableDef t => _t;
 		public virtual TTableDef t { get; } = _t;
 
 		public static TableMetaInfo _TableInfo;
@@ -82,7 +81,7 @@ namespace EntityFX.Core
 		/// <summary>
 		/// Returns an instance of 
 		/// </summary>
-		public TDCodeGenerator Code => new TDCodeGenerator() { };
+		public TDCodeGenerator Code => new() { };
 
 		public string FullTableName => TableMeta.TableNameFull;
 
@@ -178,42 +177,13 @@ namespace EntityFX.Core
 		#region --- GET ---
 
 		public virtual T GetById(TId id, bool? noTracking = null)
-		{
-			bool _asNoTracking = noTracking ?? AsNoTracking; // _dbSettings.AsNoTracking;
-															 //if (!_asNoTracking)
-															 //	return _dbSet.Find(id);
-			return WhereMatchTId(Get(_asNoTracking), id).FirstOrDefault(); // .FirstOrDefault(e => _getIdFromT(e).Equals(id));
-																		   //e.Id.Equals(id));
-																		   //PredicateBuilder.GetByIdPredicate<T>(id));
-																		   //return dbset.FirstOrDefault(PredicateBuilder.GetByIdPredicate<T>(id));
-																		   //return dbset.Find(id);
-		}
+			=> WhereMatchTId(Get(noTracking ?? AsNoTracking), id).FirstOrDefault();
 
 		public virtual async Task<T> GetByIdAsync(TId id, bool? noTracking = null)
-		{
-			bool _asNoTracking = noTracking ?? AsNoTracking; // _dbSettings.AsNoTracking;
-															 //if (!_asNoTracking)
-															 //	return await _dbSet.FindAsync(id);
-			return await WhereMatchTId(Get(_asNoTracking), id).FirstOrDefaultAsync(); //Get(_asNoTracking).FirstOrDefaultAsync(e => _getIdFromT(e).Equals(id)); //e.Id.Equals(id));
-		}
+			=> await WhereMatchTId(Get(noTracking ?? AsNoTracking), id).FirstOrDefaultAsync();
 
 		public virtual IQueryable<T> Get(bool? noTracking = null)
-		{
-			bool _asNoTracking = noTracking ?? AsNoTracking; // _dbSettings.AsNoTracking;
-			return _asNoTracking
-				? _dbSet.AsNoTracking()
-				: _dbSet;
-		}
-
-		public virtual IQueryable<T> GetTest(TId xyz)
-		{
-			var q = WhereMatchTId(Get(), xyz); //.Where(e => _getIdFromT(e).Equals(xyz));
-											   //var q = Get().Where(e => _getIdFromT(e).Equals(xyz));
-											   //var z = Get().Where(e => e _getIdFromT(e).Equals(xyz));
-
-			//q = Get().Where(_tMatch);
-			return q;
-		}
+			=> noTracking ?? AsNoTracking ? _dbSet.AsNoTracking() : _dbSet;
 
 		#endregion
 
@@ -227,12 +197,7 @@ namespace EntityFX.Core
 			IQueryable<T> source,
 			int index,
 			int take)
-		{
-			var q = PrimaryOrder(source)
-				.Skip(index)
-				.Take(take);
-			return q;
-		}
+			=> PrimaryOrder(source).Skip(index).Take(take);
 
 		public IQueryable<T> GetRange(
 			Expression<Func<T, bool>> predicate,
@@ -246,13 +211,7 @@ namespace EntityFX.Core
 			Expression<Func<T, bool>> predicate,
 			int index,
 			int take)
-		{
-			var q = PrimaryOrder(source)
-				.Where(predicate)
-				.Skip(index)
-				.Take(take);
-			return q;
-		}
+			=> PrimaryOrder(source).Where(predicate).Skip(index).Take(take);
 
 		#region --- ADD ---
 
@@ -275,9 +234,8 @@ namespace EntityFX.Core
 		/// </summary>
 		public virtual void Upsert(T entity)
 		{
-			if(entity == null)
-				throw new ArgumentNullException();
-			if(IdNotSet(entity)) // GetIdFromT(entity).Equals(_defaultId)) // entity.Id.Equals(_defaultId))
+			ArgumentNullException.ThrowIfNull(entity);
+			if(IdNotSet(entity))
 				Add(entity);
 			else
 				Update(entity);
@@ -290,13 +248,12 @@ namespace EntityFX.Core
 		/// <param name="entity"></param>
 		public virtual void Update(T entity)
 		{
-			if(entity == null)
-				throw new ArgumentException("Cannot add a null entity.");
+			ArgumentNullException.ThrowIfNull(entity);
 
-			var entry = _dbContext.Entry<T>(entity);
+			EntityEntry<T> entry = _dbContext.Entry(entity);
 
 			if(entry.State == EntityState.Detached) {
-				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity)); // _getIdFromT(e).Equals(_getIdFromT(entity))); //e.Id.Equals(entity.Id));  // You need to have access to key
+				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity));
 				if(attachedEntity != null) {
 					var attachedEntry = _dbContext.Entry(attachedEntity);
 					attachedEntry.CurrentValues.SetValues(entity);
@@ -319,7 +276,7 @@ namespace EntityFX.Core
 			else {
 
 				EntityEntry<T> entry = null;
-				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity)); // _getIdFromT(e).Equals(_getIdFromT(entity))); // e.Id.Equals(entity.Id));  // You need to have access to key
+				T attachedEntity = _dbSet.Local.SingleOrDefault(e => MatchesId(e, entity));
 
 				if(attachedEntity != null) {
 					entry = _dbContext.Entry(attachedEntity);
@@ -355,7 +312,7 @@ namespace EntityFX.Core
 		{
 			bool _deleteDirect = deleteDirect != null
 				? (bool)deleteDirect
-				: DeleteDirectDefault; // _dbSettings.DeleteDirectByDefault;
+				: DeleteDirectDefault;
 			if(_deleteDirect)
 				return DeleteDirect(id);
 			else {
@@ -389,14 +346,10 @@ namespace EntityFX.Core
 
 
 		public int SaveChanges()
-		{
-			return _dbContext.SaveChanges();
-		}
+			=> _dbContext.SaveChanges();
 
 		public async Task<int> SaveChangesAsync()
-		{
-			return await _dbContext.SaveChangesAsync();
-		}
+			=> await _dbContext.SaveChangesAsync();
 
 		/// <summary>
 		/// Call this before calling SaveAsync in order to turn on identity_insert,
@@ -412,7 +365,7 @@ namespace EntityFX.Core
 			if(turnOn)
 				_db.OpenConnection();
 
-			int result = await _db.ExecuteSqlRawAsync(command); // .ExecuteSqlCommandAsync(command); // .ExecuteSqlCommand(command);
+			int result = await _db.ExecuteSqlRawAsync(command);
 
 			if(!turnOn)
 				_db.CloseConnection();
@@ -428,9 +381,6 @@ namespace EntityFX.Core
 
 		protected int DbExecuteSqlCommand(string sql, params object[] args)
 		{
-			//int result = args.IsNulle()
-			//	? _db.ExecuteSqlCommand(sql)
-			//	: _db.ExecuteSqlCommand(sql, args);
 			int result = args.IsNulle()
 				? _db.ExecuteSqlRaw(sql)
 				: _db.ExecuteSqlRaw(sql, args);
@@ -439,27 +389,20 @@ namespace EntityFX.Core
 
 		protected async Task<int> DbExecuteSqlCommandAsync(string sql, params object[] args)
 		{
-			//int result = args.IsNulle()
-			//	? await _db.ExecuteSqlCommandAsync(sql)
-			//	: await _db.ExecuteSqlCommandAsync(sql, args); // TOTALLY stupid, if args is null, throws exception! but since it is a params, it should allow
 			int result = args.IsNulle()
 				? await _db.ExecuteSqlRawAsync(sql)
-				: await _db.ExecuteSqlRawAsync(sql, args); // TOTALLY stupid, if args is null, throws exception! but since it is a params, it should allow
+				: await _db.ExecuteSqlRawAsync(sql, args);
+			// stupid, if args is null, throws exception! but since it is a params, it should allow
 			return result;
 		}
 
 		public void Dispose()
-		{
-			_dbContext?.Dispose();
-		}
+			=> _dbContext?.Dispose();
 
 
 
 		public SQLQuery GetSQLQuery()
-		{
-			var q = new SQLQuery(TableMeta, PKOrderFinal);
-			return q;
-		}
+			=> new(TableMeta, PKOrderFinal);
 
 		#region --- Was From DbRepositoryCoreBase ---
 
@@ -488,7 +431,7 @@ namespace EntityFX.Core
 
 			string sql = vals.Key;
 
-			int result = DbExecuteSqlCommand(sql, args); // db.ExecuteSqlCommand(sql, _args);
+			int result = DbExecuteSqlCommand(sql, args);
 			return result;
 		}
 
@@ -512,28 +455,18 @@ namespace EntityFX.Core
 
 
 		public virtual int UpdateDirect(TId id, params SqlParam[] updateColumns)
-		{
-			int result = __UpdateDirect(id, null, updateColumns);
-			return result;
-		}
+			=> __UpdateDirect(id, null, updateColumns);
 
 
 		public virtual int UpdateDirect(TId id, string updateColumnName, object value)
-		{
-			return __UpdateDirect(id, null, new SqlParam(updateColumnName, value));
-		}
+			=> __UpdateDirect(id, null, new SqlParam(updateColumnName, value));
 
 		public virtual int UpdateDirect(params SqlParam[] updateColumns)
-		{
-			int result = __UpdateDirect(_defaultId, null, updateColumns);
-			return result;
-		}
+			=> __UpdateDirect(_defaultId, null, updateColumns);
 
 		public virtual int UpdateDirect(string whereClause, params SqlParam[] updateColumns)
 		{
-			if(whereClause.IsNulle()) throw new ArgumentNullException();
-			// note: we allow them to send in with no where filter, but do not allow
-			// if they called this clause that exects it, for safety's sake
+			ArgumentNullException.ThrowIfNull(whereClause);
 			int result = __UpdateDirect(_defaultId, whereClause, updateColumns);
 			return result;
 		}
@@ -541,27 +474,17 @@ namespace EntityFX.Core
 		// ---------
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, string updateColumnName, object value)
-		{
-			return await __UpdateDirectAsync(id, null, new SqlParam(updateColumnName, value));
-		}
+			=> await __UpdateDirectAsync(id, null, new SqlParam(updateColumnName, value));
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params SqlParam[] updateColumns)
-		{
-			int result = await __UpdateDirectAsync(id, null, updateColumns);
-			return result;
-		}
+			=> await __UpdateDirectAsync(id, null, updateColumns);
 
 		public async virtual Task<int> UpdateDirectAsync(params SqlParam[] updateColumns)
-		{
-			int result = await __UpdateDirectAsync(_defaultId, null, updateColumns);
-			return result;
-		}
+			=> await __UpdateDirectAsync(_defaultId, null, updateColumns);
 
 		public async virtual Task<int> UpdateDirectAsync(string whereClause, params SqlParam[] updateColumns)
 		{
-			if(whereClause.IsNulle()) throw new ArgumentNullException();
-			// note: we allow them to send in with no where filter, but do not allow
-			// if they called this clause that exects it, for safety's sake
+			ArgumentNullException.ThrowIfNull(whereClause);
 			int result = await __UpdateDirectAsync(_defaultId, whereClause, updateColumns);
 			return result;
 		}
@@ -583,19 +506,13 @@ namespace EntityFX.Core
 		}
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params KeyValuePair<string, object>[] vals)
-		{
-			return await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
-		}
+			=> await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, params KV[] vals)
-		{
-			return await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
-		}
+			=> await __UpdateDirectAsync(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
 
 		public async virtual Task<int> UpdateDirectAsync(TId id, Func<TTableDef, IEnumerable<KeyValuePair<string, object>>> exp)
-		{
-			return await __UpdateDirectAsync(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
-		}
+			=> await __UpdateDirectAsync(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 
 		// ---------
 
@@ -614,19 +531,13 @@ namespace EntityFX.Core
 		}
 
 		public virtual int UpdateDirect(TId id, params KeyValuePair<string, object>[] vals)
-		{
-			return __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
-		}
+			=> __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 
 		public virtual int UpdateDirect(TId id, params KV[] vals)
-		{
-			return __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
-		}
+			=> __UpdateDirect(id, null, vals.Select(k => new SqlParam(k.Key.ToString(), k.Value)).ToArray());
 
 		public virtual int UpdateDirect(TId id, Func<TTableDef, IEnumerable<KeyValuePair<string, object>>> exp)
-		{
-			return __UpdateDirect(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
-		}
+			=> __UpdateDirect(id, null, exp(_t).Select(k => new SqlParam(k.Key, k.Value)).ToArray());
 
 
 		#endregion
@@ -634,14 +545,10 @@ namespace EntityFX.Core
 		#region --- ExecuteProc ---
 
 		public int ExecuteProc(string procName, TId id, params SqlParam[] args)
-		{
-			return ExecuteProc(procName, _CombineIdWithArgs(id, args));
-		}
+			=> ExecuteProc(procName, _CombineIdWithArgs(id, args));
 
 		public int ExecuteProc(string procName, TId id, params KeyValuePair<string, object>[] args)
-		{
-			return ExecuteProc(procName, _CombineIdWithArgs(id, args));
-		}
+			=> ExecuteProc(procName, _CombineIdWithArgs(id, args));
 
 		public int ExecuteProc(string procName, params SqlParam[] args)
 		{
@@ -654,14 +561,10 @@ namespace EntityFX.Core
 		// ----------
 
 		public async Task<int> ExecuteProcAsync(string procName, TId id, params SqlParam[] args)
-		{
-			return await ExecuteProcAsync(procName, _CombineIdWithArgs(id, args));
-		}
+			=> await ExecuteProcAsync(procName, _CombineIdWithArgs(id, args));
 
 		public async Task<int> ExecuteProcAsync(string procName, TId id, params KeyValuePair<string, object>[] args)
-		{
-			return await ExecuteProcAsync(procName, _CombineIdWithArgs(id, args));
-		}
+			=> await ExecuteProcAsync(procName, _CombineIdWithArgs(id, args));
 
 		public async Task<int> ExecuteProcAsync(string procName, params SqlParam[] args)
 		{
@@ -676,52 +579,37 @@ namespace EntityFX.Core
 		#region --- DeleteDirect ---
 
 		public virtual int DeleteDirect(TId id)
-		{
-			return DbExecuteSqlCommand(_DeleteDirectStr(id));
-		}
+			=> DbExecuteSqlCommand(_DeleteDirectStr(id));
 
 		public virtual async Task<int> DeleteDirectAsync(TId id)
-		{
-			return await DbExecuteSqlCommandAsync(_DeleteDirectStr(id));
-		}
+			=> await DbExecuteSqlCommandAsync(_DeleteDirectStr(id));
 
 		public virtual int DeleteAll()
-		{
-			string sql = $"DELETE {FullTableName}";
-			return DbExecuteSqlCommand(sql);
-		}
+			=> DbExecuteSqlCommand($"DELETE FROM {FullTableName}");
 
 		public virtual int DeleteDirectWhere(string colName, object value, string operatr = "=")
-		{
-			return DbExecuteSqlCommand(_DeleteDirectStrWhere(colName, value, operatr));
-		}
+			=> DbExecuteSqlCommand(_DeleteDirectStrWhere(colName, value, operatr));
 
 		public virtual async Task<int> DeleteDirectWhereAsync(string colName, object value, string operatr = "=")
-		{
-			return await DbExecuteSqlCommandAsync(_DeleteDirectStrWhere(colName, value, operatr));
-		}
+			=> await DbExecuteSqlCommandAsync(_DeleteDirectStrWhere(colName, value, operatr));
 
 		string _DeleteDirectStr(TId id)
-		{
-			string sql = $"DELETE {FullTableName} WHERE {IdName} = {IdToString(id)}";
-			return sql;
-		}
+			=> $"DELETE FROM {FullTableName} WHERE {IdName} = {IdToString(id)}";
 
 		string _DeleteDirectStrWhere(string colName, object value, string operatr)
 		{
 			string val = value?.ToString();
-			if(colName.IsNulle() || operatr.IsNulle() || val.IsNulle())
-				throw new ArgumentNullException();
-			string sql = $"DELETE {FullTableName} WHERE {colName} {operatr} {val}";
+
+			ArgumentException.ThrowIfNullOrEmpty(colName);
+			ArgumentException.ThrowIfNullOrEmpty(operatr);
+			ArgumentException.ThrowIfNullOrEmpty(val);
+
+			string sql = $"DELETE FROM {FullTableName} WHERE {colName} {operatr} {val}";
 			return sql;
 		}
 
 		string _DeleteDirectStr(TId id, NameValueMatch nvm)
-		{
-			// whoa: this needs to change!!! use parameters...
-			string sql = $"DELETE {FullTableName} WHERE {IdName} = {IdToString(id)} AND {nvm}";
-			return sql;
-		}
+			=> $"DELETE FROM {FullTableName} WHERE {IdName} = {IdToString(id)} AND {nvm}";
 
 		public int DeleteDirect(TId id, NameValueMatch nvm)
 		{
@@ -738,10 +626,7 @@ namespace EntityFX.Core
 		}
 
 		public int DeleteDirect(NameValueMatch nvm)
-		{
-			string sql = $"DELETE {FullTableName} WHERE {nvm}";
-			return DbExecuteSqlCommand(sql);
-		}
+			=> DbExecuteSqlCommand($"DELETE FROM {FullTableName} WHERE {nvm}");
 
 
 		#endregion
@@ -753,7 +638,7 @@ namespace EntityFX.Core
 			if(args != null)
 				args = args.Where(a => a != null).ToArray();
 			if(args.IsNulle())
-				throw new ArgumentNullException(); // huh? why was this required to always have args?
+				throw new ArgumentNullException(nameof(args)); // huh? why was this required to always have args?
 
 			string columnsSets = _GetParametersString(true, args);
 
